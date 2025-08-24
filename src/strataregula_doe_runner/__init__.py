@@ -1,0 +1,41 @@
+"""
+Strataregula DOE Runner - Batch experiment orchestrator
+
+This package provides functionality to execute predefined cases from CSV files
+and collect standardized metrics, not to design experiments.
+
+Core Components:
+- Runner: Main execution engine 
+- Executor: Case execution management
+- CSVHandler: Deterministic CSV I/O
+- CaseCache: Result caching with case_hash
+"""
+
+__version__ = "0.1.0"
+__author__ = "Strataregula Team"
+__email__ = "support@strataregula.dev"
+
+from .core.runner import Runner, ExecutionResult
+from .core.executor import CaseExecutor
+from .io.csv_handler import CSVHandler
+from .adapters.base import BaseAdapter
+
+# Plugin integration
+try:
+    from .plugin import DOERunnerPlugin
+    _PLUGIN_AVAILABLE = True
+except ImportError:
+    DOERunnerPlugin = None
+    _PLUGIN_AVAILABLE = False
+
+__all__ = [
+    "Runner",
+    "ExecutionResult", 
+    "CaseExecutor",
+    "CSVHandler",
+    "BaseAdapter",
+    "__version__",
+]
+
+if _PLUGIN_AVAILABLE:
+    __all__.append("DOERunnerPlugin")
