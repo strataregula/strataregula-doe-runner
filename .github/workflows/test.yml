@@ -1,0 +1,166 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[test,dev]"
+    
+    - name: Lint with ruff
+      run: |
+        ruff check src/ tests/
+        ruff format --check src/ tests/
+    
+    - name: Type check with mypy
+      run: |
+        mypy src/strataregula_doe_runner/
+    
+    - name: Security check with bandit
+      run: |
+        bandit -r src/strataregula_doe_runner/
+    
+    - name: Test with pytest
+      run: |
+        pytest tests/ \
+          --cov=strataregula_doe_runner \
+          --cov-report=xml \
+          --cov-report=term-missing \
+          --cov-fail-under=80 \
+          -v
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: true
+        verbose: true
+
+  integration:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install package
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[test]"
+    
+    - name: Test CLI installation
+      run: |
+        srd --help
+        srd --version
+    
+    - name: Test plugin discovery
+      run: |
+        python -c "
+        import pkg_resources
+        eps = list(pkg_resources.iter_entry_points('strataregula.plugins'))
+        print(f'Found {len(eps)} plugins')
+        for ep in eps:
+            if ep.name == 'doe_runner':
+                plugin = ep.load()()
+                info = plugin.get_info()
+                print(f'Plugin: {info[\"name\"]} v{info[\"version\"]}')
+        "
+    
+    - name: End-to-end test
+      run: |
+        # Create test cases
+        cat > test_cases.csv << EOF
+        case_id,backend,cmd_template,timeout_s,seed,retries,resource_group,expected_p95,threshold_p95
+        test-01,dummy,"echo 'dummy test'",10,42,2,default,0.05,0.06
+        test-02,shell,"echo 'p95=0.08 p99=0.12 throughput_rps=500'",10,123,1,default,0.08,0.10
+        EOF
+        
+        # Execute via CLI
+        srd run --cases test_cases.csv --out metrics.csv --dry-run
+        
+        # Execute via plugin
+        python -c "
+        from strataregula_doe_runner.plugin import DOERunnerPlugin
+        plugin = DOERunnerPlugin()
+        result = plugin.execute_cases(
+            cases_path='test_cases.csv',
+            metrics_path='metrics_test.csv',
+            max_workers=1,
+            verbose=True
+        )
+        print(f'Execution result: {result[\"status\"]}')
+        print(f'Exit code: {result[\"exit_code\"]}')
+        assert result['status'] == 'success', f'Failed: {result}'
+        "
+        
+        # Verify metrics output
+        if [ -f "metrics_test.csv" ]; then
+          echo "✅ Metrics file generated"
+          head -3 metrics_test.csv
+        else
+          echo "❌ Metrics file not found"
+          exit 1
+        fi
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [test, integration]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+    
+    - name: Build package
+      run: |
+        python -m build
+    
+    - name: Check package
+      run: |
+        python -m twine check dist/*
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist-packages
+        path: dist/
