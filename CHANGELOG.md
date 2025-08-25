@@ -27,7 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Independent plugin design (no BasePlugin inheritance)
 - Modular adapter system for different backends
 - Forward-compatible naming convention (strataregula-*)
-- Backward compatibility layer (sr_doe_runner deprecated)
 - Type-safe implementation with proper error handling
 
 ### Documentation
