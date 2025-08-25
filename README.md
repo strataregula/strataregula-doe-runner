@@ -1,11 +1,11 @@
 # Strataregula - DOE Runner
 
-[![Tests](https://github.com/unizontech/strataregula-doe-runner/actions/workflows/test.yml/badge.svg)](https://github.com/unizontech/strataregula-doe-runner/actions/workflows/test.yml)
-[![Coverage](https://codecov.io/gh/unizontech/strataregula-doe-runner/branch/main/graph/badge.svg)](https://codecov.io/gh/unizontech/strataregula-doe-runner)
+[![Tests](https://github.com/strataregula/strataregula-doe-runner/actions/workflows/test.yml/badge.svg)](https://github.com/strataregula/strataregula-doe-runner/actions/workflows/test.yml)
+[![Coverage](https://codecov.io/gh/strataregula/strataregula-doe-runner/branch/main/graph/badge.svg)](https://codecov.io/gh/strataregula/strataregula-doe-runner)
 [![PyPI](https://img.shields.io/pypi/v/strataregula-doe-runner.svg)](https://pypi.org/project/strataregula-doe-runner/)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Strataregula Plugin](https://img.shields.io/badge/Strataregula-Plugin-green)](https://github.com/unizontech/strataregula)
+[![Strataregula Plugin](https://img.shields.io/badge/Strataregula-Plugin-green)](https://github.com/strataregula/strataregula)
 
 Batch experiment orchestrator for Strataregula ecosystem.
 

@@ -90,7 +90,7 @@ pip install strataregula-doe-runner[simroute]
 
 ### Development Installation
 ```bash
-git clone https://github.com/unizontech/strataregula-doe-runner.git
+git clone https://github.com/strataregula/strataregula-doe-runner.git
 cd strataregula-doe-runner
 pip install -e ".[dev]"
 ```
@@ -185,13 +185,13 @@ print(f"Exit Code: {result['exit_code']}")
 ## Support & Community
 
 - **📚 Documentation**: This site
-- **🐛 Issue Tracker**: [GitHub Issues](https://github.com/unizontech/strataregula-doe-runner/issues)
-- **💬 Discussions**: [GitHub Discussions](https://github.com/unizontech/strataregula-doe-runner/discussions)
+- **🐛 Issue Tracker**: [GitHub Issues](https://github.com/strataregula/strataregula-doe-runner/issues)
+- **💬 Discussions**: [GitHub Discussions](https://github.com/strataregula/strataregula-doe-runner/discussions)
 - **📧 Email**: doe-runner@strataregula.dev
 
 ## License
 
-Apache License 2.0 - see [LICENSE](https://github.com/unizontech/strataregula-doe-runner/blob/main/LICENSE) for details.
+Apache License 2.0 - see [LICENSE](https://github.com/strataregula/strataregula-doe-runner/blob/main/LICENSE) for details.
 
 ---
 

@@ -5,7 +5,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    image: unizontech/strataregula-doe-runner:latest
+    image: strataregula/strataregula-doe-runner:latest
     container_name: strataregula-doe-runner
     volumes:
       - ../examples:/app/examples:ro

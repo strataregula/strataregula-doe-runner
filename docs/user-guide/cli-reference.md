@@ -523,7 +523,7 @@ echo "📋 Run logs available in: docs/run/"
 docker run --rm \
   -v $(pwd)/cases:/app/cases:ro \
   -v $(pwd)/results:/app/results \
-  unizontech/strataregula-doe-runner:latest \
+  strataregula/strataregula-doe-runner:latest \
   srd run --cases /app/cases/production.csv --out /app/results/metrics.csv --max-workers 4 --verbose
 ```
 

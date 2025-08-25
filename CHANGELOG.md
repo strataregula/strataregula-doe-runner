@@ -35,5 +35,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example cases.csv files
 - Architecture decision records
 
-[Unreleased]: https://github.com/unizontech/strataregula-doe-runner/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/unizontech/strataregula-doe-runner/releases/tag/v0.1.0
+[Unreleased]: https://github.com/strataregula/strataregula-doe-runner/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/strataregula/strataregula-doe-runner/releases/tag/v0.1.0

@@ -25,7 +25,7 @@ pip install strataregula-doe-runner[simroute]
 
 ### Option 3: Development Installation
 ```bash
-git clone https://github.com/unizontech/strataregula-doe-runner.git
+git clone https://github.com/strataregula/strataregula-doe-runner.git
 cd strataregula-doe-runner
 pip install -e ".[dev]"
 ```
@@ -338,7 +338,7 @@ slow-test,shell,"sleep 60",30
 
 - **Documentation**: Continue reading this documentation
 - **Examples**: Check the `examples/` directory
-- **Issues**: [GitHub Issues](https://github.com/unizontech/strataregula-doe-runner/issues)  
-- **Discussions**: [GitHub Discussions](https://github.com/unizontech/strataregula-doe-runner/discussions)
+- **Issues**: [GitHub Issues](https://github.com/strataregula/strataregula-doe-runner/issues)  
+- **Discussions**: [GitHub Discussions](https://github.com/strataregula/strataregula-doe-runner/discussions)
 
 Ready to dive deeper? Continue with [Cases CSV Format](cases-format.md) to learn about all available options.
