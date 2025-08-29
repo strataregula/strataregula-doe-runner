@@ -137,13 +137,6 @@ jobs:
         }
         
         echo "✅ All tests passed with sufficient coverage!"
-    
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        fail_ci_if_error: true
-        verbose: true
 
   integration:
     runs-on: ubuntu-latest
