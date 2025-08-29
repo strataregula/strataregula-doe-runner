@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .runner import ExecutionResult
+    from .runner import ExecutionResult, Runner
 from ..adapters.base import BaseAdapter
 from ..adapters.dummy import DummyAdapter
 from ..adapters.shell import ShellAdapter
@@ -18,7 +18,7 @@ from ..adapters.shell import ShellAdapter
 class CaseExecutor:
     """個別ケースの実行管理"""
 
-    def __init__(self, parent):
+    def __init__(self, parent: Runner) -> None:
         self.parent = parent
         # アダプターの登録
         self.adapters = {
@@ -157,7 +157,7 @@ class CaseExecutor:
         result = {}
         exception = None
 
-        def execute_case():
+        def execute_case() -> None:
             nonlocal result, exception
             try:
                 result = adapter.execute(case)
@@ -179,10 +179,10 @@ class CaseExecutor:
 
         return result
 
-    def add_adapter(self, name: str, adapter: BaseAdapter):
+    def add_adapter(self, name: str, adapter: BaseAdapter) -> None:
         """アダプターを動的に追加"""
         self.adapters[name] = adapter
 
-    def list_adapters(self) -> list:
+    def list_adapters(self) -> list[str]:
         """利用可能なアダプター一覧を取得"""
         return list(self.adapters.keys())

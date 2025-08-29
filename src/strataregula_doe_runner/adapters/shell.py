@@ -29,7 +29,7 @@ class TemplateEngine:
 class ShellAdapter(BaseAdapter):
     """シェルコマンドを実行するアダプター"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.template_engine = TemplateEngine()
 
     def execute(self, case: Dict[str, Any]) -> Dict[str, Any]:

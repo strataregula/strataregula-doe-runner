@@ -20,9 +20,9 @@ class DOERunnerPlugin:
     description = "Batch experiment orchestrator for cases.csv → metrics.csv pipeline"
     author = "Strataregula Team"
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize DOE Runner plugin."""
-        self.runner = None
+        self.runner: Runner | None = None
         self.cache = CaseCache()
         logger.info(f"Initialized {self.name} v{self.version}")
 
@@ -49,7 +49,7 @@ class DOERunnerPlugin:
         }
 
     def execute_cases(
-        self, cases_path: str, metrics_path: str = "metrics.csv", **options
+        self, cases_path: str, metrics_path: str = "metrics.csv", **options: Any
     ) -> Dict[str, Any]:
         """Execute cases from CSV file."""
         try:
@@ -66,8 +66,12 @@ class DOERunnerPlugin:
             self.runner = Runner(**config)
             exit_code = self.runner.execute(cases_path, metrics_path)
 
+            # エラーコードをチェック
+            if exit_code == 3:
+                return {"status": "error", "exit_code": exit_code, "message": "File not found or execution failed"}
+
             # 統計情報をテストで期待される形式に変換
-            stats = self.runner.stats if self.runner else {}
+            stats: dict[str, Any] = self.runner.stats if self.runner else {}
             test_stats = {
                 "total_cases": stats.get("total", 0),
                 "successful": stats.get("success", 0),
@@ -121,15 +125,11 @@ class DOERunnerPlugin:
     def get_cache_status(self, cases_path: str) -> Dict[str, Any]:
         """Get cache status for cases."""
         try:
-            # 簡易的なキャッシュヒット数計算
+            # キャッシュヒット数を取得
             cache_hits = 0
             if self.runner and hasattr(self.runner, "cache"):
-                # 実際のキャッシュ実装に応じて調整
-                cache_hits = (
-                    len(self.runner.cache.list_cached_cases())
-                    if hasattr(self.runner.cache, "list_cached_cases")
-                    else 0
-                )
+                # CaseCache.size()メソッドを使用
+                cache_hits = self.runner.cache.size()
 
             return {
                 "status": "success",
@@ -143,7 +143,7 @@ class DOERunnerPlugin:
         """Clear cache for cases."""
         try:
             if self.runner and hasattr(self.runner, "cache"):
-                self.runner.cache.clear_all()
+                self.runner.cache.clear()
 
             return {"status": "success", "message": "Cache cleared successfully"}
         except Exception as e:
@@ -161,6 +161,6 @@ class DOERunnerPlugin:
 
 
 # Plugin factory function for strataregula
-def create_plugin():
+def create_plugin() -> DOERunnerPlugin:
     """Factory function to create plugin instance."""
     return DOERunnerPlugin()

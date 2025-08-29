@@ -26,7 +26,7 @@ try:
 
     _PLUGIN_AVAILABLE = True
 except ImportError:
-    DOERunnerPlugin = None
+    _DOERunnerPlugin = None
     _PLUGIN_AVAILABLE = False
 
 __all__ = [

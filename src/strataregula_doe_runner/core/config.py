@@ -4,12 +4,12 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-def _b(env, default):
+def _b(env: str, default: bool) -> bool:
     v = os.getenv(env)
     return default if v is None else v not in ("0", "false", "False", "off", "OFF")
 
 
-def _run_id():
+def _run_id() -> str:
     jst = datetime.timezone(datetime.timedelta(hours=9))
     return datetime.datetime.now(jst).strftime("%Y%m%d-%H%M%S-JST")
 

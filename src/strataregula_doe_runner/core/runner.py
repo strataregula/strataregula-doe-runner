@@ -44,15 +44,15 @@ class Runner:
 
     def __init__(
         self,
-        max_workers=1,
-        fail_fast=False,
-        force_rerun=False,
-        dry_run=False,
-        verbose=False,
-        run_log_dir="docs/run",
-        compat_mode=False,
+        max_workers: int = 1,
+        fail_fast: bool = False,
+        force_rerun: bool = False,
+        dry_run: bool = False,
+        verbose: bool = False,
+        run_log_dir: str = "docs/run",
+        compat_mode: bool = False,
         cfg: Config | None = None,
-    ):
+    ) -> None:
         self.max_workers = max_workers
         self.fail_fast = fail_fast
         self.force_rerun = force_rerun
@@ -205,11 +205,12 @@ class Runner:
 
                     if not self.force_rerun and self.cache.exists(case_hash):
                         cached = self.cache.load(case_hash)
-                        results.append(cached)
-                        self.stats["skipped"] += 1
-                        if self.verbose:
-                            print(f"  Cached: {case['case_id']}")
-                        continue
+                        if cached is not None:
+                            results.append(cached)
+                            self.stats["skipped"] += 1
+                            if self.verbose:
+                                print(f"  Cached: {case['case_id']}")
+                            continue
 
                     # 実行スケジュール
                     future = executor.submit(self._execute_single_case, case)
@@ -307,7 +308,7 @@ class Runner:
 
     def _write_metrics(
         self, results: List[ExecutionResult], path: str, cases: List[Dict]
-    ):
+    ) -> None:
         """決定論的なmetrics.csv出力"""
         # 結果を辞書化
         metrics_data = []
@@ -330,7 +331,7 @@ class Runner:
 
     def _group_by_resource(self, cases: List[Dict]) -> Dict[str, List[Dict]]:
         """resource_groupによるグループ化"""
-        groups = {}
+        groups: dict[str, list[Dict]] = {}
         for case in cases:
             group = case.get("resource_group", "default")
             if group not in groups:
@@ -338,7 +339,7 @@ class Runner:
             groups[group].append(case)
         return groups
 
-    def _print_report(self):
+    def _print_report(self) -> None:
         """実行レポート出力"""
         print("\n" + "=" * 50)
         print("Execution Report")
@@ -351,7 +352,7 @@ class Runner:
         print(f"Threshold violations: {self.stats['threshold_violations']}")
 
         # 実行時間の統計も追加可能
-        success_rate = 0
+        success_rate: float = 0.0
         if self.stats["total"] > 0:
             success_rate = (self.stats["success"] / self.stats["total"]) * 100
         print(f"Success rate: {success_rate:.1f}%")

@@ -30,7 +30,7 @@ class CSVHandler:
         Path(file_path).parent.mkdir(parents=True, exist_ok=True)
 
         # Get all column names
-        all_columns = set()
+        all_columns: set[str] = set()
         for row in metrics_data:
             all_columns.update(row.keys())
 

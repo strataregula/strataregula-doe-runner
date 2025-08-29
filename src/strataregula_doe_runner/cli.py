@@ -13,7 +13,7 @@ from .core.runner import Runner
 
 @click.group()
 @click.version_option()
-def cli():
+def cli() -> None:
     """Strataregula DOE Runner - Batch experiment orchestrator"""
     pass
 
@@ -33,7 +33,7 @@ def cli():
 @click.option("--force", is_flag=True, help="Force re-execution (ignore cache)")
 @click.option("--dry-run", is_flag=True, help="Validate only, do not execute")
 @click.option("--verbose", "-v", is_flag=True, help="Verbose output")
-def run(cases, out, max_workers, fail_fast, force, dry_run, verbose):
+def run(cases: str, out: str, max_workers: int, fail_fast: bool, force: bool, dry_run: bool, verbose: bool) -> None:
     """
     Execute cases from CSV and generate metrics.
 
@@ -88,7 +88,7 @@ def run(cases, out, max_workers, fail_fast, force, dry_run, verbose):
     type=click.Path(exists=True),
     help="Cases CSV file to validate",
 )
-def validate(cases):
+def validate(cases: str) -> None:
     """Validate cases CSV file format and content."""
     from .core.validator import CaseValidator
 
@@ -112,7 +112,7 @@ def validate(cases):
 
 @cli.command()
 @click.option("--cache-dir", default=".doe_cache", help="Cache directory path")
-def cache(cache_dir):
+def cache(cache_dir: str) -> None:
     """Manage execution cache."""
     from .core.cache import CaseCache
 
@@ -129,7 +129,7 @@ def cache(cache_dir):
 
 
 # CLIエントリポイント
-def main():
+def main() -> None:
     cli()
 
 

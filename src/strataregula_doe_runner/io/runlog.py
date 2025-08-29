@@ -10,15 +10,15 @@ from typing import Dict, List
 class RunlogWriter:
     """Simple runlog writer for testing"""
 
-    def __init__(self, log_path: Path, compat_mode: bool = False):
+    def __init__(self, log_path: Path, compat_mode: bool = False) -> None:
         self.log_path = Path(log_path)
         self.compat_mode = compat_mode
-        self.content = []
+        self.content: list[str] = []
 
         # Create directory
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
 
-    def write_header(self, start_time: datetime, cases_path: str, total_cases: int):
+    def write_header(self, start_time: datetime, cases_path: str, total_cases: int) -> None:
         """Write log header"""
         self.content.append("# DOE Runner Execution Log")
         self.content.append("")
@@ -27,7 +27,7 @@ class RunlogWriter:
         self.content.append(f"**Total Cases:** {total_cases}")
         self.content.append("")
 
-    def write_summary(self, stats: Dict, results: List, duration: timedelta):
+    def write_summary(self, stats: Dict, results: List, duration: timedelta) -> None:
         """Write execution summary"""
         self.content.append("## Summary")
         self.content.append("")
@@ -43,7 +43,7 @@ class RunlogWriter:
         with open(self.log_path, "w", encoding="utf-8") as f:
             f.write("\n".join(self.content))
 
-    def write_artifacts(self, artifact_paths: List[str]):
+    def write_artifacts(self, artifact_paths: List[str]) -> None:
         """Write artifact references"""
         if artifact_paths:
             self.content.append("## Artifacts")
