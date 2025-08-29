@@ -39,9 +39,7 @@ dependencies = [
 dev = [
     "pytest>=6.0.0",
     "pytest-cov>=2.10.0",
-    "black>=21.0.0",
-    "isort>=5.0.0",
-    "flake8>=3.8.0",
+    "ruff>=0.1.0",
     "mypy>=0.910",
 ]
 
@@ -81,30 +79,31 @@ include = [
 [tool.hatch.build.targets.wheel]
 packages = ["src/strataregula_doe_runner"]
 
-[tool.black]
+[tool.ruff]
+target-version = "py38"
 line-length = 88
-target-version = ["py38", "py39", "py310", "py311"]
-include = '\.pyi?$'
-extend-exclude = '''
-/(
-  | build
-  | dist  
-  | \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-)/
-'''
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-line_length = 88
-known_first_party = ["strataregula_doe_runner"]
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "lf"
+
+# isort configuration removed - now handled by ruff
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
