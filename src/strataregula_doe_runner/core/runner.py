@@ -69,7 +69,16 @@ class Runner:
             'threshold_violations': 0
         }
     
-    def execute(self, cases_path: str, metrics_path: str) -> int:
+    def execute(
+        self,
+        cases_path: str,
+        metrics_path: str,
+        *,
+        max_workers: Optional[int] = None,
+        dry_run: Optional[bool] = None,
+        force: Optional[bool] = None,
+        verbose: Optional[bool] = None,
+    ) -> int:
         """
         メイン実行ループ
         
@@ -79,6 +88,16 @@ class Runner:
             3: エラー
         """
         try:
+            # 単回実行のオプション上書き
+            if max_workers is not None:
+                self.max_workers = max_workers
+            if dry_run is not None:
+                self.dry_run = dry_run
+            if force is not None:
+                self.force_rerun = force
+            if verbose is not None:
+                self.verbose = verbose
+
             # JST時刻でRunログ初期化
             jst = timezone(timedelta(hours=9))
             start_time = datetime.now(jst)
@@ -106,9 +125,11 @@ class Runner:
                 print(f"Executing {len(cases)} cases with {self.max_workers} workers...")
             
             results = self._execute_cases(cases)
-            
+
             # 4. threshold検証
             threshold_violations = self._check_thresholds(cases, results)
+            self.stats['threshold_violations'] = len(threshold_violations)
+            self.stats['threshold_violations_list'] = threshold_violations
             
             # 5. metrics.csv出力（決定論的）
             if self.verbose:
@@ -254,39 +275,40 @@ class Runner:
         """単一ケース実行"""
         return self.executor.execute(case)
     
-    def _check_thresholds(self, cases: List[Dict], 
-                         results: List[ExecutionResult]) -> int:
+    def _check_thresholds(
+        self, cases: List[Dict], results: List[ExecutionResult]
+    ) -> List[str]:
         """threshold検証"""
-        violations = 0
-        
+        violations: List[str] = []
+
         # case_idでマッチング
         result_map = {r.case_id: r for r in results}
-        
+
         for case in cases:
             result = result_map.get(case['case_id'])
             if not result:
                 continue
-            
+
             # expected_* と threshold_* のチェック
             for metric in ['p95', 'p99', 'throughput_rps']:
-                expected_key = f'expected_{metric}'
                 threshold_key = f'threshold_{metric}'
-                
+
                 if threshold_key in case and case[threshold_key]:
                     try:
                         threshold = float(case[threshold_key])
                         actual = getattr(result, metric)
-                        
+
                         if actual is not None and actual > threshold:
-                            violations += 1
+                            violations.append(case['case_id'])
                             if self.verbose:
-                                print(f"⚠️  Threshold violation: {case['case_id']} "
-                                      f"{metric}={actual} > {threshold}")
+                                print(
+                                    f"⚠️  Threshold violation: {case['case_id']} "
+                                    f"{metric}={actual} > {threshold}"
+                                )
                     except (ValueError, TypeError):
                         # 無効なthreshold値はスキップ
                         continue
-        
-        self.stats['threshold_violations'] = violations
+
         return violations
     
     def _write_metrics(self, results: List[ExecutionResult], 

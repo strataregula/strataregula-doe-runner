@@ -31,12 +31,17 @@ class CSVHandler:
         all_columns = set()
         for row in metrics_data:
             all_columns.update(row.keys())
-        
-        # Simple column ordering
-        columns = sorted(all_columns)
-        
-        with open(file_path, 'w', encoding='utf-8', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=columns)
+
+        # Ensure required columns appear first
+        required_start = [
+            'case_id', 'status', 'run_seconds', 'p95', 'p99',
+            'throughput_rps', 'errors', 'ts_start', 'ts_end'
+        ]
+        remaining = sorted([c for c in all_columns if c not in required_start])
+        columns = required_start + remaining
+
+        with open(file_path, 'w', encoding='utf-8', newline='\n') as f:
+            writer = csv.DictWriter(f, fieldnames=columns, lineterminator='\n')
             writer.writeheader()
             for row in metrics_data:
                 writer.writerow(row)
