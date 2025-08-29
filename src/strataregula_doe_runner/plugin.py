@@ -68,7 +68,11 @@ class DOERunnerPlugin:
 
             # エラーコードをチェック
             if exit_code == 3:
-                return {"status": "error", "exit_code": exit_code, "message": "File not found or execution failed"}
+                return {
+                    "status": "error",
+                    "exit_code": exit_code,
+                    "message": "File not found or execution failed",
+                }
 
             # 統計情報をテストで期待される形式に変換
             stats: dict[str, Any] = self.runner.stats if self.runner else {}

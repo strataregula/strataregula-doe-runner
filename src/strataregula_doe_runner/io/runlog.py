@@ -17,7 +17,9 @@ class RunlogWriter:
         # Create directory
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
 
-    def write_header(self, start_time: datetime, cases_path: str, total_cases: int) -> None:
+    def write_header(
+        self, start_time: datetime, cases_path: str, total_cases: int
+    ) -> None:
         """Write log header"""
         self.content.append("# DOE Runner Execution Log")
         self.content.append("")

@@ -120,7 +120,9 @@ def performance_cases_csv(temp_dir: Path) -> Path:
 class TestEndToEndWorkflow:
     """Test complete DOE Runner workflow."""
 
-    def test_complete_workflow_success(self, sample_cases_csv: Path, temp_dir: Path) -> None:
+    def test_complete_workflow_success(
+        self, sample_cases_csv: Path, temp_dir: Path
+    ) -> None:
         """Test complete workflow: cases.csv → execution → metrics.csv → validation."""
         metrics_file = temp_dir / "metrics.csv"
 
@@ -208,12 +210,16 @@ class TestEndToEndWorkflow:
         # Results should be identical (deterministic)
         assert len(first_metrics) == len(second_metrics)
 
-        for _i, (first, second) in enumerate(zip(first_metrics, second_metrics, strict=False)):
+        for _i, (first, second) in enumerate(
+            zip(first_metrics, second_metrics, strict=False)
+        ):
             assert first["case_id"] == second["case_id"]
             assert first["status"] == second["status"]
             # Note: execution times may differ slightly due to cache hits
 
-    def test_force_execution_bypasses_cache(self, sample_cases_csv: Path, temp_dir: Path) -> None:
+    def test_force_execution_bypasses_cache(
+        self, sample_cases_csv: Path, temp_dir: Path
+    ) -> None:
         """Test that --force flag bypasses cache."""
         metrics_file = temp_dir / "metrics.csv"
 
@@ -246,7 +252,9 @@ class TestEndToEndWorkflow:
         # No metrics file should be created
         assert not metrics_file.exists()
 
-    def test_parallel_execution(self, performance_cases_csv: Path, temp_dir: Path) -> None:
+    def test_parallel_execution(
+        self, performance_cases_csv: Path, temp_dir: Path
+    ) -> None:
         """Test parallel execution with multiple workers."""
         metrics_file = temp_dir / "metrics_parallel.csv"
 
@@ -300,7 +308,9 @@ class TestEndToEndWorkflow:
 class TestPluginIntegration:
     """Test plugin interface and integration."""
 
-    def test_plugin_discovery_and_execution(self, sample_cases_csv: Path, temp_dir: Path) -> None:
+    def test_plugin_discovery_and_execution(
+        self, sample_cases_csv: Path, temp_dir: Path
+    ) -> None:
         """Test plugin discovery and execution through plugin interface."""
         metrics_file = temp_dir / "plugin_metrics.csv"
 
@@ -450,7 +460,9 @@ class TestCLIIntegration:
 class TestCSVFormat:
     """Test output CSV format."""
 
-    def test_csv_format_compliance(self, sample_cases_csv: Path, temp_dir: Path) -> None:
+    def test_csv_format_compliance(
+        self, sample_cases_csv: Path, temp_dir: Path
+    ) -> None:
         """Test that output CSV follows format specifications."""
         metrics_file = temp_dir / "format_test.csv"
 

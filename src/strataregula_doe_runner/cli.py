@@ -33,7 +33,15 @@ def cli() -> None:
 @click.option("--force", is_flag=True, help="Force re-execution (ignore cache)")
 @click.option("--dry-run", is_flag=True, help="Validate only, do not execute")
 @click.option("--verbose", "-v", is_flag=True, help="Verbose output")
-def run(cases: str, out: str, max_workers: int, fail_fast: bool, force: bool, dry_run: bool, verbose: bool) -> None:
+def run(
+    cases: str,
+    out: str,
+    max_workers: int,
+    fail_fast: bool,
+    force: bool,
+    dry_run: bool,
+    verbose: bool,
+) -> None:
     """
     Execute cases from CSV and generate metrics.
 

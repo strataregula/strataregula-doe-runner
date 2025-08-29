@@ -35,7 +35,11 @@ def get_available_adapters() -> dict[str, Any]:
             "name": "ShellAdapter",
             "description": "シェルコマンド実行アダプター",
             "available": True,
-            "supported_features": ["command_execution", "metrics_parsing", "timeout_handling"],
+            "supported_features": [
+                "command_execution",
+                "metrics_parsing",
+                "timeout_handling",
+            ],
         },
         "dummy": {
             "name": "DummyAdapter",
@@ -47,7 +51,9 @@ def get_available_adapters() -> dict[str, Any]:
             "name": "SimrouteAdapter",
             "description": "Simrouteシミュレーションアダプター",
             "available": _SIMROUTE_AVAILABLE,
-            "supported_features": ["simulation", "routing_analysis"] if _SIMROUTE_AVAILABLE else [],
+            "supported_features": ["simulation", "routing_analysis"]
+            if _SIMROUTE_AVAILABLE
+            else [],
         },
     }
 
