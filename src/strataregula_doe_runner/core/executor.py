@@ -19,8 +19,9 @@ from ..adapters.dummy import DummyAdapter
 
 class CaseExecutor:
     """個別ケースの実行管理"""
-    
-    def __init__(self):
+
+    def __init__(self, parent):
+        self.parent = parent
         # アダプターの登録
         self.adapters = {
             'shell': ShellAdapter(),
@@ -60,11 +61,26 @@ class CaseExecutor:
         try:
             # タイムアウト付き実行
             metrics = self._execute_with_timeout(adapter, case, timeout_s)
-            
+
+            stdout = metrics.pop('stdout', None)
+            stderr = metrics.pop('stderr', None)
+            stdout_path = stderr_path = ""
+
+            if self.parent.cfg.obs_enabled and self.parent.cfg.save_stdout:
+                ts_dir = datetime.now().strftime("%Y%m%d-%H%M%S")
+                adir = self.parent.cfg.artifacts_dir / case_id / ts_dir
+                adir.mkdir(parents=True, exist_ok=True)
+                if stdout is not None:
+                    (adir / "stdout.log").write_text(stdout or "", encoding="utf-8")
+                    stdout_path = str(adir / "stdout.log")
+                if stderr is not None:
+                    (adir / "stderr.log").write_text(stderr or "", encoding="utf-8")
+                    stderr_path = str(adir / "stderr.log")
+
             # 実行時間計測
             run_seconds = time.time() - start_time
             ts_end = datetime.now().isoformat()
-            
+
             # 結果構築（動的インポート）
             from .runner import ExecutionResult
             result = ExecutionResult(
@@ -82,7 +98,7 @@ class CaseExecutor:
                 queue_depth_p95=metrics.get('queue_depth_p95'),
                 latency_p50=metrics.get('latency_p50')
             )
-            
+
             return result
             
         except TimeoutError:

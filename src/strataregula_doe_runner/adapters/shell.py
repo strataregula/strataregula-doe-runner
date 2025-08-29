@@ -60,7 +60,9 @@ class ShellAdapter(BaseAdapter):
             
             # 出力からメトリクスを抽出
             metrics = self._parse_metrics(result.stdout + result.stderr)
-            
+            metrics['stdout'] = result.stdout
+            metrics['stderr'] = result.stderr
+
             # 実行時間情報を追加
             metrics['execution_time'] = execution_time
             

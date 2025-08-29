@@ -36,7 +36,7 @@ class CSVHandler:
         columns = sorted(all_columns)
         
         with open(file_path, 'w', encoding='utf-8', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=columns)
+            writer = csv.DictWriter(f, fieldnames=columns, lineterminator='\n')
             writer.writeheader()
             for row in metrics_data:
                 writer.writerow(row)

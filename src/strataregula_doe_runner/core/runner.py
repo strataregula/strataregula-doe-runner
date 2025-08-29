@@ -17,6 +17,7 @@ from ..io import CSVHandler, RunlogWriter, MetricsNormalizer
 from .cache import CaseCache
 from .executor import CaseExecutor
 from .validator import CaseValidator
+from .config import Config
 
 @dataclass
 class ExecutionResult:
@@ -43,7 +44,7 @@ class Runner:
     
     def __init__(self, max_workers=1, fail_fast=False, force_rerun=False,
                  dry_run=False, verbose=False, run_log_dir='docs/run',
-                 compat_mode=False):
+                 compat_mode=False, cfg: Config | None = None):
         self.max_workers = max_workers
         self.fail_fast = fail_fast
         self.force_rerun = force_rerun
@@ -51,11 +52,12 @@ class Runner:
         self.verbose = verbose
         self.run_log_dir = Path(run_log_dir)
         self.compat_mode = compat_mode
+        self.cfg = cfg or Config()
         
         # コンポーネント初期化
         self.csv_handler = CSVHandler()
         self.cache = CaseCache()
-        self.executor = CaseExecutor()
+        self.executor = CaseExecutor(self)
         self.validator = CaseValidator()
         self.normalizer = MetricsNormalizer()
         
@@ -297,6 +299,7 @@ class Runner:
         
         for result in results:
             row = asdict(result)
+            row["run_id"] = self.cfg.run_id
             
             # param_* を追加（入力転写）
             case = next((c for c in cases if c['case_id'] == result.case_id), {})
