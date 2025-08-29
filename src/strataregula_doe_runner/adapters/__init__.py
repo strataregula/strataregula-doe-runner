@@ -3,8 +3,8 @@
 """
 
 from .base import BaseAdapter
-from .shell import ShellAdapter
 from .dummy import DummyAdapter
+from .shell import ShellAdapter
 
 # simroute アダプターは extras 依存のため動的インポート
 try:
@@ -16,7 +16,7 @@ except ImportError:
 
 __all__ = [
     "BaseAdapter",
-    "ShellAdapter", 
+    "ShellAdapter",
     "DummyAdapter",
 ]
 

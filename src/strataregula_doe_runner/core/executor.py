@@ -4,18 +4,15 @@
 from __future__ import annotations
 
 import time
-import subprocess
-import signal
-import re
 from datetime import datetime
-from typing import Dict, Optional, TYPE_CHECKING
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .runner import ExecutionResult
 from ..adapters.base import BaseAdapter
-from ..adapters.shell import ShellAdapter
 from ..adapters.dummy import DummyAdapter
+from ..adapters.shell import ShellAdapter
+
 
 class CaseExecutor:
     """個別ケースの実行管理"""
@@ -27,44 +24,43 @@ class CaseExecutor:
             'shell': ShellAdapter(),
             'dummy': DummyAdapter(),
         }
-        
+
         # simroute アダプターは動的に登録（extras依存）
         try:
             from ..adapters.simroute import SimrouteAdapter
             self.adapters['simroute'] = SimrouteAdapter()
         except ImportError:
             pass
-    
-    def execute(self, case: Dict) -> 'ExecutionResult':
+
+    def execute(self, case: dict) -> ExecutionResult:
         """
         単一ケースの実行
-        
+
         Args:
             case: ケース情報（case_id, backend, cmd_template等）
-            
+
         Returns:
             ExecutionResult: 実行結果
         """
         case_id = case['case_id']
         backend = case.get('backend', 'shell')
         timeout_s = int(case.get('timeout_s', 30))
-        
+
         # アダプター取得
         adapter = self.adapters.get(backend)
         if not adapter:
             raise ValueError(f"Unknown backend: {backend}")
-        
+
         # 実行開始
         ts_start = datetime.now().isoformat()
         start_time = time.time()
-        
+
         try:
             # タイムアウト付き実行
             metrics = self._execute_with_timeout(adapter, case, timeout_s)
 
             stdout = metrics.pop('stdout', None)
             stderr = metrics.pop('stderr', None)
-            stdout_path = stderr_path = ""
 
             if self.parent.cfg.obs_enabled and self.parent.cfg.save_stdout:
                 ts_dir = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -72,10 +68,10 @@ class CaseExecutor:
                 adir.mkdir(parents=True, exist_ok=True)
                 if stdout is not None:
                     (adir / "stdout.log").write_text(stdout or "", encoding="utf-8")
-                    stdout_path = str(adir / "stdout.log")
+                    str(adir / "stdout.log")
                 if stderr is not None:
                     (adir / "stderr.log").write_text(stderr or "", encoding="utf-8")
-                    stderr_path = str(adir / "stderr.log")
+                    str(adir / "stderr.log")
 
             # 実行時間計測
             run_seconds = time.time() - start_time
@@ -100,7 +96,7 @@ class CaseExecutor:
             )
 
             return result
-            
+
         except TimeoutError:
             # タイムアウト
             run_seconds = time.time() - start_time
@@ -116,8 +112,8 @@ class CaseExecutor:
                 ts_start=ts_start,
                 ts_end=datetime.now().isoformat()
             )
-            
-        except Exception as e:
+
+        except Exception:
             # 実行エラー
             run_seconds = time.time() - start_time
             from .runner import ExecutionResult
@@ -132,54 +128,54 @@ class CaseExecutor:
                 ts_start=ts_start,
                 ts_end=datetime.now().isoformat()
             )
-    
-    def _execute_with_timeout(self, adapter: BaseAdapter, case: Dict, timeout_s: int) -> Dict:
+
+    def _execute_with_timeout(self, adapter: BaseAdapter, case: dict, timeout_s: int) -> dict:
         """
         タイムアウト付きアダプター実行
-        
+
         Args:
             adapter: 実行アダプター
             case: ケース情報
             timeout_s: タイムアウト秒数
-            
+
         Returns:
             Dict: メトリクス辞書
-            
+
         Raises:
             TimeoutError: タイムアウト時
             Exception: その他エラー時
         """
         import threading
-        
+
         result = {}
         exception = None
-        
+
         def execute_case():
             nonlocal result, exception
             try:
                 result = adapter.execute(case)
             except Exception as e:
                 exception = e
-        
+
         # バックグラウンド実行
         thread = threading.Thread(target=execute_case)
         thread.daemon = True
         thread.start()
         thread.join(timeout=timeout_s)
-        
+
         if thread.is_alive():
             # タイムアウト - スレッドを強制終了はできないが、例外を投げる
             raise TimeoutError(f"Execution timed out after {timeout_s}s")
-        
+
         if exception:
             raise exception
-        
+
         return result
-    
+
     def add_adapter(self, name: str, adapter: BaseAdapter):
         """アダプターを動的に追加"""
         self.adapters[name] = adapter
-    
+
     def list_adapters(self) -> list:
         """利用可能なアダプター一覧を取得"""
         return list(self.adapters.keys())
