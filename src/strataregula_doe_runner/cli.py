@@ -1,6 +1,7 @@
 """
 DOE Runner CLI - バッチ実験オーケストレータ
 """
+
 import os
 import sys
 
@@ -16,21 +17,22 @@ def cli():
     """Strataregula DOE Runner - Batch experiment orchestrator"""
     pass
 
+
 @cli.command()
-@click.option('--cases', required=True, type=click.Path(exists=True),
-              help='Input cases CSV file path')
-@click.option('--out', default='metrics.csv',
-              help='Output metrics CSV file path')
-@click.option('--max-workers', default=1, type=int,
-              help='Maximum parallel workers (default: 1)')
-@click.option('--fail-fast', is_flag=True,
-              help='Stop execution on first failure')
-@click.option('--force', is_flag=True,
-              help='Force re-execution (ignore cache)')
-@click.option('--dry-run', is_flag=True,
-              help='Validate only, do not execute')
-@click.option('--verbose', '-v', is_flag=True,
-              help='Verbose output')
+@click.option(
+    "--cases",
+    required=True,
+    type=click.Path(exists=True),
+    help="Input cases CSV file path",
+)
+@click.option("--out", default="metrics.csv", help="Output metrics CSV file path")
+@click.option(
+    "--max-workers", default=1, type=int, help="Maximum parallel workers (default: 1)"
+)
+@click.option("--fail-fast", is_flag=True, help="Stop execution on first failure")
+@click.option("--force", is_flag=True, help="Force re-execution (ignore cache)")
+@click.option("--dry-run", is_flag=True, help="Validate only, do not execute")
+@click.option("--verbose", "-v", is_flag=True, help="Verbose output")
 def run(cases, out, max_workers, fail_fast, force, dry_run, verbose):
     """
     Execute cases from CSV and generate metrics.
@@ -42,8 +44,8 @@ def run(cases, out, max_workers, fail_fast, force, dry_run, verbose):
     """
 
     # 環境変数の読み取り
-    run_log_dir = os.getenv('RUN_LOG_DIR', 'docs/run')
-    compat_mode = os.getenv('RUN_LOG_WRITE_COMPAT', '0') == '1'
+    run_log_dir = os.getenv("RUN_LOG_DIR", "docs/run")
+    compat_mode = os.getenv("RUN_LOG_WRITE_COMPAT", "0") == "1"
 
     runner = Runner(
         max_workers=max_workers,
@@ -52,7 +54,7 @@ def run(cases, out, max_workers, fail_fast, force, dry_run, verbose):
         dry_run=dry_run,
         verbose=verbose,
         run_log_dir=run_log_dir,
-        compat_mode=compat_mode
+        compat_mode=compat_mode,
     )
 
     try:
@@ -74,12 +76,18 @@ def run(cases, out, max_workers, fail_fast, force, dry_run, verbose):
         click.echo(f"Error: {e}", err=True)
         if verbose:
             import traceback
+
             traceback.print_exc()
         sys.exit(3)
 
+
 @cli.command()
-@click.option('--cases', required=True, type=click.Path(exists=True),
-              help='Cases CSV file to validate')
+@click.option(
+    "--cases",
+    required=True,
+    type=click.Path(exists=True),
+    help="Cases CSV file to validate",
+)
 def validate(cases):
     """Validate cases CSV file format and content."""
     from .core.validator import CaseValidator
@@ -101,9 +109,9 @@ def validate(cases):
         click.echo(f"Validation failed: {e}", err=True)
         sys.exit(1)
 
+
 @cli.command()
-@click.option('--cache-dir', default='.doe_cache',
-              help='Cache directory path')
+@click.option("--cache-dir", default=".doe_cache", help="Cache directory path")
 def cache(cache_dir):
     """Manage execution cache."""
     from .core.cache import CaseCache
@@ -119,9 +127,11 @@ def cache(cache_dir):
         click.echo("  srd cache clear  - Clear all cache")
         click.echo("  srd cache clean  - Remove old entries")
 
+
 # CLIエントリポイント
 def main():
     cli()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

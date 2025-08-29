@@ -1,6 +1,7 @@
 """
 case_hashによるキャッシュ機能
 """
+
 from __future__ import annotations
 
 import json
@@ -9,6 +10,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .runner import ExecutionResult
+
 
 class CaseCache:
     """ケース実行結果のキャッシュ"""
@@ -28,15 +30,13 @@ class CaseCache:
 
         # ExecutionResultを辞書化
         from dataclasses import asdict
+
         data = asdict(result)
 
         # メタデータ追加
-        data['_cache_meta'] = {
-            'cached_at': result.ts_end,
-            'cache_version': '1.0'
-        }
+        data["_cache_meta"] = {"cached_at": result.ts_end, "cache_version": "1.0"}
 
-        with open(cache_file, 'w', encoding='utf-8') as f:
+        with open(cache_file, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
     def load(self, case_hash: str) -> ExecutionResult | None:
@@ -47,14 +47,15 @@ class CaseCache:
             return None
 
         try:
-            with open(cache_file, encoding='utf-8') as f:
+            with open(cache_file, encoding="utf-8") as f:
                 data = json.load(f)
 
             # メタデータ除去
-            data.pop('_cache_meta', None)
+            data.pop("_cache_meta", None)
 
             # ExecutionResultに復元（動的インポート）
             from .runner import ExecutionResult
+
             return ExecutionResult(**data)
 
         except (json.JSONDecodeError, TypeError, ValueError):
@@ -79,6 +80,7 @@ class CaseCache:
     def cleanup_old(self, days: int = 7) -> int:
         """古いキャッシュエントリを削除"""
         import time
+
         cutoff = time.time() - (days * 24 * 60 * 60)
         count = 0
 

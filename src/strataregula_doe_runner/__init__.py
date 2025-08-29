@@ -23,6 +23,7 @@ from .io.csv_handler import CSVHandler
 # Plugin integration
 try:
     from .plugin import DOERunnerPlugin
+
     _PLUGIN_AVAILABLE = True
 except ImportError:
     DOERunnerPlugin = None

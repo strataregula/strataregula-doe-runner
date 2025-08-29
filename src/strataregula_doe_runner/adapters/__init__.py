@@ -9,6 +9,7 @@ from .shell import ShellAdapter
 # simroute アダプターは extras 依存のため動的インポート
 try:
     from .simroute import SimrouteAdapter
+
     _SIMROUTE_AVAILABLE = True
 except ImportError:
     SimrouteAdapter = None

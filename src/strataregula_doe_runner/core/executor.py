@@ -1,6 +1,7 @@
 """
 ケース実行管理
 """
+
 from __future__ import annotations
 
 import time
@@ -21,14 +22,15 @@ class CaseExecutor:
         self.parent = parent
         # アダプターの登録
         self.adapters = {
-            'shell': ShellAdapter(),
-            'dummy': DummyAdapter(),
+            "shell": ShellAdapter(),
+            "dummy": DummyAdapter(),
         }
 
         # simroute アダプターは動的に登録（extras依存）
         try:
             from ..adapters.simroute import SimrouteAdapter
-            self.adapters['simroute'] = SimrouteAdapter()
+
+            self.adapters["simroute"] = SimrouteAdapter()
         except ImportError:
             pass
 
@@ -42,9 +44,9 @@ class CaseExecutor:
         Returns:
             ExecutionResult: 実行結果
         """
-        case_id = case['case_id']
-        backend = case.get('backend', 'shell')
-        timeout_s = int(case.get('timeout_s', 30))
+        case_id = case["case_id"]
+        backend = case.get("backend", "shell")
+        timeout_s = int(case.get("timeout_s", 30))
 
         # アダプター取得
         adapter = self.adapters.get(backend)
@@ -59,8 +61,8 @@ class CaseExecutor:
             # タイムアウト付き実行
             metrics = self._execute_with_timeout(adapter, case, timeout_s)
 
-            stdout = metrics.pop('stdout', None)
-            stderr = metrics.pop('stderr', None)
+            stdout = metrics.pop("stdout", None)
+            stderr = metrics.pop("stderr", None)
 
             if self.parent.cfg.obs_enabled and self.parent.cfg.save_stdout:
                 ts_dir = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -79,20 +81,21 @@ class CaseExecutor:
 
             # 結果構築（動的インポート）
             from .runner import ExecutionResult
+
             result = ExecutionResult(
                 case_id=case_id,
-                status='OK',
+                status="OK",
                 run_seconds=run_seconds,
-                p95=metrics.get('p95'),
-                p99=metrics.get('p99'),
-                throughput_rps=metrics.get('throughput_rps', 0.0),
-                errors=metrics.get('errors', 0),
+                p95=metrics.get("p95"),
+                p99=metrics.get("p99"),
+                throughput_rps=metrics.get("throughput_rps", 0.0),
+                errors=metrics.get("errors", 0),
                 ts_start=ts_start,
                 ts_end=ts_end,
-                cpu_util=metrics.get('cpu_util'),
-                mem_peak_mb=metrics.get('mem_peak_mb'),
-                queue_depth_p95=metrics.get('queue_depth_p95'),
-                latency_p50=metrics.get('latency_p50')
+                cpu_util=metrics.get("cpu_util"),
+                mem_peak_mb=metrics.get("mem_peak_mb"),
+                queue_depth_p95=metrics.get("queue_depth_p95"),
+                latency_p50=metrics.get("latency_p50"),
             )
 
             return result
@@ -101,35 +104,39 @@ class CaseExecutor:
             # タイムアウト
             run_seconds = time.time() - start_time
             from .runner import ExecutionResult
+
             return ExecutionResult(
                 case_id=case_id,
-                status='TIMEOUT',
+                status="TIMEOUT",
                 run_seconds=run_seconds,
                 p95=None,
                 p99=None,
                 throughput_rps=0.0,
                 errors=1,
                 ts_start=ts_start,
-                ts_end=datetime.now().isoformat()
+                ts_end=datetime.now().isoformat(),
             )
 
         except Exception:
             # 実行エラー
             run_seconds = time.time() - start_time
             from .runner import ExecutionResult
+
             return ExecutionResult(
                 case_id=case_id,
-                status='FAIL',
+                status="FAIL",
                 run_seconds=run_seconds,
                 p95=None,
                 p99=None,
                 throughput_rps=0.0,
                 errors=1,
                 ts_start=ts_start,
-                ts_end=datetime.now().isoformat()
+                ts_end=datetime.now().isoformat(),
             )
 
-    def _execute_with_timeout(self, adapter: BaseAdapter, case: dict, timeout_s: int) -> dict:
+    def _execute_with_timeout(
+        self, adapter: BaseAdapter, case: dict, timeout_s: int
+    ) -> dict:
         """
         タイムアウト付きアダプター実行
 

@@ -1,6 +1,7 @@
 """
 Run log writer stub
 """
+
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List
@@ -39,8 +40,8 @@ class RunlogWriter:
         self.content.append("")
 
         # Write to file
-        with open(self.log_path, 'w', encoding='utf-8') as f:
-            f.write('\n'.join(self.content))
+        with open(self.log_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(self.content))
 
     def write_artifacts(self, artifact_paths: List[str]):
         """Write artifact references"""

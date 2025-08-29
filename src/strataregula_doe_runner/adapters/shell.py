@@ -1,6 +1,7 @@
 """
 シェルコマンド実行アダプター
 """
+
 import re
 import subprocess
 import time
@@ -18,11 +19,12 @@ class TemplateEngine:
         """
         result = template
         for key, value in context.items():
-            if key not in ['cmd_template']:  # cmd_template自体は展開しない
+            if key not in ["cmd_template"]:  # cmd_template自体は展開しない
                 placeholder = f"{{{key}}}"
                 if placeholder in result:
                     result = result.replace(placeholder, str(value))
         return result
+
 
 class ShellAdapter(BaseAdapter):
     """シェルコマンドを実行するアダプター"""
@@ -43,7 +45,7 @@ class ShellAdapter(BaseAdapter):
         - mem_peak_mb=256
         """
         # テンプレートの展開
-        cmd_template = case['cmd_template']
+        cmd_template = case["cmd_template"]
         cmd = self.template_engine.expand(cmd_template, case)
 
         # コマンド実行
@@ -55,22 +57,22 @@ class ShellAdapter(BaseAdapter):
                 shell=True,
                 capture_output=True,
                 text=True,
-                timeout=int(case.get('timeout_s', 30))
+                timeout=int(case.get("timeout_s", 30)),
             )
 
             execution_time = time.time() - start_time
 
             # 出力からメトリクスを抽出
             metrics = self._parse_metrics(result.stdout + result.stderr)
-            metrics['stdout'] = result.stdout
-            metrics['stderr'] = result.stderr
+            metrics["stdout"] = result.stdout
+            metrics["stderr"] = result.stderr
 
             # 実行時間情報を追加
-            metrics['execution_time'] = execution_time
+            metrics["execution_time"] = execution_time
 
             # エラーハンドリング
             if result.returncode != 0:
-                metrics['errors'] = metrics.get('errors', 0) + 1
+                metrics["errors"] = metrics.get("errors", 0) + 1
 
             return metrics
 
@@ -88,24 +90,19 @@ class ShellAdapter(BaseAdapter):
         - "key: value" 形式
         - JSON形式の部分抽出
         """
-        metrics = {
-            'p95': None,
-            'p99': None,
-            'throughput_rps': 0.0,
-            'errors': 0
-        }
+        metrics = {"p95": None, "p99": None, "throughput_rps": 0.0, "errors": 0}
 
         # key=value パターン
         kv_patterns = [
-            (r'p95[=:]\s*([0-9.]+)', 'p95'),
-            (r'p99[=:]\s*([0-9.]+)', 'p99'),
-            (r'throughput_rps[=:]\s*([0-9.]+)', 'throughput_rps'),
-            (r'throughput[=:]\s*([0-9.]+)', 'throughput_rps'),
-            (r'errors[=:]\s*([0-9]+)', 'errors'),
-            (r'cpu_util[=:]\s*([0-9.]+)', 'cpu_util'),
-            (r'mem_peak_mb[=:]\s*([0-9.]+)', 'mem_peak_mb'),
-            (r'queue_depth_p95[=:]\s*([0-9.]+)', 'queue_depth_p95'),
-            (r'latency_p50[=:]\s*([0-9.]+)', 'latency_p50')
+            (r"p95[=:]\s*([0-9.]+)", "p95"),
+            (r"p99[=:]\s*([0-9.]+)", "p99"),
+            (r"throughput_rps[=:]\s*([0-9.]+)", "throughput_rps"),
+            (r"throughput[=:]\s*([0-9.]+)", "throughput_rps"),
+            (r"errors[=:]\s*([0-9]+)", "errors"),
+            (r"cpu_util[=:]\s*([0-9.]+)", "cpu_util"),
+            (r"mem_peak_mb[=:]\s*([0-9.]+)", "mem_peak_mb"),
+            (r"queue_depth_p95[=:]\s*([0-9.]+)", "queue_depth_p95"),
+            (r"latency_p50[=:]\s*([0-9.]+)", "latency_p50"),
         ]
 
         for pattern, key in kv_patterns:
@@ -115,15 +112,24 @@ class ShellAdapter(BaseAdapter):
                 metrics[key] = value
 
         # JSON形式の部分抽出を試行
-        json_match = re.search(r'\{[^}]+\}', output)
+        json_match = re.search(r"\{[^}]+\}", output)
         if json_match:
             try:
                 import json
+
                 json_data = json.loads(json_match.group(0))
 
                 # JSONからメトリクスを抽出
-                for key in ['p95', 'p99', 'throughput_rps', 'errors', 'cpu_util',
-                           'mem_peak_mb', 'queue_depth_p95', 'latency_p50']:
+                for key in [
+                    "p95",
+                    "p99",
+                    "throughput_rps",
+                    "errors",
+                    "cpu_util",
+                    "mem_peak_mb",
+                    "queue_depth_p95",
+                    "latency_p50",
+                ]:
                     if key in json_data:
                         metrics[key] = json_data[key]
 
@@ -131,9 +137,9 @@ class ShellAdapter(BaseAdapter):
                 pass
 
         # デフォルト値の設定
-        if metrics['throughput_rps'] == 0.0 and metrics.get('errors', 0) == 0:
+        if metrics["throughput_rps"] == 0.0 and metrics.get("errors", 0) == 0:
             # エラーがなくてスループットが0の場合、最低値を設定
-            metrics['throughput_rps'] = 1.0
+            metrics["throughput_rps"] = 1.0
 
         return metrics
 
@@ -143,7 +149,7 @@ class ShellAdapter(BaseAdapter):
             return False
 
         # cmd_templateが空でないかチェック
-        cmd_template = case.get('cmd_template', '').strip()
+        cmd_template = case.get("cmd_template", "").strip()
         if not cmd_template:
             return False
 

@@ -22,24 +22,60 @@ def sample_cases_csv(temp_dir):
     """Create a sample cases.csv file."""
     cases_file = temp_dir / "cases.csv"
 
-    with open(cases_file, 'w', newline='') as f:
+    with open(cases_file, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow([
-            'case_id', 'backend', 'cmd_template', 'timeout_s',
-            'seed', 'retries', 'resource_group', 'expected_p95', 'threshold_p95'
-        ])
-        writer.writerow([
-            'test-01', 'dummy', 'dummy simulation', '10',
-            '42', '1', 'default', '0.05', '0.06'
-        ])
-        writer.writerow([
-            'test-02', 'shell', "echo 'p95=0.08 p99=0.12 throughput_rps=500'", '10',
-            '123', '1', 'default', '0.08', '0.10'
-        ])
-        writer.writerow([
-            'test-03', 'shell', "echo 'p95=0.15 p99=0.20 throughput_rps=200'", '10',
-            '456', '0', 'default', '0.12', '0.12'  # This will trigger threshold violation
-        ])
+        writer.writerow(
+            [
+                "case_id",
+                "backend",
+                "cmd_template",
+                "timeout_s",
+                "seed",
+                "retries",
+                "resource_group",
+                "expected_p95",
+                "threshold_p95",
+            ]
+        )
+        writer.writerow(
+            [
+                "test-01",
+                "dummy",
+                "dummy simulation",
+                "10",
+                "42",
+                "1",
+                "default",
+                "0.05",
+                "0.06",
+            ]
+        )
+        writer.writerow(
+            [
+                "test-02",
+                "shell",
+                "echo 'p95=0.08 p99=0.12 throughput_rps=500'",
+                "10",
+                "123",
+                "1",
+                "default",
+                "0.08",
+                "0.10",
+            ]
+        )
+        writer.writerow(
+            [
+                "test-03",
+                "shell",
+                "echo 'p95=0.15 p99=0.20 throughput_rps=200'",
+                "10",
+                "456",
+                "0",
+                "default",
+                "0.12",
+                "0.12",  # This will trigger threshold violation
+            ]
+        )
 
     return cases_file
 
@@ -49,19 +85,33 @@ def performance_cases_csv(temp_dir):
     """Create performance test cases with larger dataset."""
     cases_file = temp_dir / "perf_cases.csv"
 
-    with open(cases_file, 'w', newline='') as f:
+    with open(cases_file, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow([
-            'case_id', 'backend', 'cmd_template', 'timeout_s',
-            'seed', 'retries', 'resource_group'
-        ])
+        writer.writerow(
+            [
+                "case_id",
+                "backend",
+                "cmd_template",
+                "timeout_s",
+                "seed",
+                "retries",
+                "resource_group",
+            ]
+        )
 
         # Generate 50 test cases
         for i in range(50):
-            writer.writerow([
-                f'perf-{i:02d}', 'dummy', f'dummy simulation {i}', '5',
-                str(i * 10), '0', 'perf'
-            ])
+            writer.writerow(
+                [
+                    f"perf-{i:02d}",
+                    "dummy",
+                    f"dummy simulation {i}",
+                    "5",
+                    str(i * 10),
+                    "0",
+                    "perf",
+                ]
+            )
 
     return cases_file
 
@@ -76,8 +126,7 @@ class TestEndToEndWorkflow:
         # Execute via Runner
         runner = Runner(max_workers=1, verbose=True)
         exit_code = runner.execute(
-            cases_path=str(sample_cases_csv),
-            metrics_path=str(metrics_file)
+            cases_path=str(sample_cases_csv), metrics_path=str(metrics_file)
         )
 
         # Should return exit code 2 due to threshold violation in test-03
@@ -92,28 +141,38 @@ class TestEndToEndWorkflow:
         assert len(rows) == 3  # All 3 cases should be executed
 
         # Verify required columns
-        expected_columns = ['case_id', 'status', 'run_seconds', 'p95', 'p99',
-                          'throughput_rps', 'errors', 'ts_start', 'ts_end', 'run_id']
+        expected_columns = [
+            "case_id",
+            "status",
+            "run_seconds",
+            "p95",
+            "p99",
+            "throughput_rps",
+            "errors",
+            "ts_start",
+            "ts_end",
+            "run_id",
+        ]
         for col in expected_columns:
             assert col in rows[0].keys()
 
-        run_id_values = {row['run_id'] for row in rows}
+        run_id_values = {row["run_id"] for row in rows}
         assert len(run_id_values) == 1
 
         # Verify case results
-        results_by_id = {row['case_id']: row for row in rows}
+        results_by_id = {row["case_id"]: row for row in rows}
 
         # test-01 (dummy) should succeed
-        assert results_by_id['test-01']['status'] == 'OK'
+        assert results_by_id["test-01"]["status"] == "OK"
 
         # test-02 (shell with metrics) should succeed
-        assert results_by_id['test-02']['status'] == 'OK'
-        assert float(results_by_id['test-02']['p95']) == 0.08
-        assert float(results_by_id['test-02']['throughput_rps']) == 500
+        assert results_by_id["test-02"]["status"] == "OK"
+        assert float(results_by_id["test-02"]["p95"]) == 0.08
+        assert float(results_by_id["test-02"]["throughput_rps"]) == 500
 
         # test-03 (threshold violation) should succeed but violate threshold
-        assert results_by_id['test-03']['status'] == 'OK'
-        assert float(results_by_id['test-03']['p95']) == 0.15  # Above threshold of 0.12
+        assert results_by_id["test-03"]["status"] == "OK"
+        assert float(results_by_id["test-03"]["p95"]) == 0.15  # Above threshold of 0.12
 
     def test_workflow_with_cache(self, sample_cases_csv, temp_dir):
         """Test workflow with caching - second run should use cache."""
@@ -123,8 +182,7 @@ class TestEndToEndWorkflow:
 
         # First execution
         exit_code1 = runner.execute(
-            cases_path=str(sample_cases_csv),
-            metrics_path=str(metrics_file)
+            cases_path=str(sample_cases_csv), metrics_path=str(metrics_file)
         )
 
         first_metrics = []
@@ -135,8 +193,7 @@ class TestEndToEndWorkflow:
         # Second execution (should use cache)
         metrics_file_2 = temp_dir / "metrics2.csv"
         exit_code2 = runner.execute(
-            cases_path=str(sample_cases_csv),
-            metrics_path=str(metrics_file_2)
+            cases_path=str(sample_cases_csv), metrics_path=str(metrics_file_2)
         )
 
         second_metrics = []
@@ -151,8 +208,8 @@ class TestEndToEndWorkflow:
         assert len(first_metrics) == len(second_metrics)
 
         for _i, (first, second) in enumerate(zip(first_metrics, second_metrics)):
-            assert first['case_id'] == second['case_id']
-            assert first['status'] == second['status']
+            assert first["case_id"] == second["case_id"]
+            assert first["status"] == second["status"]
             # Note: execution times may differ slightly due to cache hits
 
     def test_force_execution_bypasses_cache(self, sample_cases_csv, temp_dir):
@@ -162,17 +219,13 @@ class TestEndToEndWorkflow:
         runner = Runner(max_workers=1)
 
         # First execution
-        runner.execute(
-            cases_path=str(sample_cases_csv),
-            metrics_path=str(metrics_file)
-        )
+        runner.execute(cases_path=str(sample_cases_csv), metrics_path=str(metrics_file))
 
         # Force execution (bypass cache)
         metrics_file_2 = temp_dir / "metrics_force.csv"
         runner_force = Runner(max_workers=1, force_rerun=True)
         exit_code = runner_force.execute(
-            cases_path=str(sample_cases_csv),
-            metrics_path=str(metrics_file_2)
+            cases_path=str(sample_cases_csv), metrics_path=str(metrics_file_2)
         )
 
         assert exit_code == 2  # Should still have threshold violations
@@ -184,8 +237,7 @@ class TestEndToEndWorkflow:
 
         runner = Runner(dry_run=True)
         exit_code = runner.execute(
-            cases_path=str(sample_cases_csv),
-            metrics_path=str(metrics_file)
+            cases_path=str(sample_cases_csv), metrics_path=str(metrics_file)
         )
 
         # Dry run should succeed (validation only)
@@ -199,8 +251,7 @@ class TestEndToEndWorkflow:
 
         runner = Runner(max_workers=4, verbose=True)
         runner.execute(
-            cases_path=str(performance_cases_csv),
-            metrics_path=str(metrics_file)
+            cases_path=str(performance_cases_csv), metrics_path=str(metrics_file)
         )
 
         assert metrics_file.exists()
@@ -216,15 +267,14 @@ class TestEndToEndWorkflow:
         invalid_cases = temp_dir / "invalid.csv"
 
         # Create invalid CSV (missing required columns)
-        with open(invalid_cases, 'w') as f:
+        with open(invalid_cases, "w") as f:
             f.write("case_id,invalid_column\ntest,value\n")
 
         metrics_file = temp_dir / "metrics.csv"
 
         runner = Runner()
         exit_code = runner.execute(
-            cases_path=str(invalid_cases),
-            metrics_path=str(metrics_file)
+            cases_path=str(invalid_cases), metrics_path=str(metrics_file)
         )
 
         # Should fail with exit code 3 (configuration error)
@@ -239,13 +289,11 @@ class TestEndToEndWorkflow:
 
         runner = Runner()
         exit_code = runner.execute(
-            cases_path=str(missing_file),
-            metrics_path=str(metrics_file)
+            cases_path=str(missing_file), metrics_path=str(metrics_file)
         )
 
         # Should fail with exit code 3 (I/O error)
         assert exit_code == 3
-
 
 
 class TestPluginIntegration:
@@ -260,28 +308,28 @@ class TestPluginIntegration:
 
         # Verify plugin info
         info = plugin.get_info()
-        assert info['name'] == 'doe_runner'
-        assert 'execute_cases' in info['supported_commands']
+        assert info["name"] == "doe_runner"
+        assert "execute_cases" in info["supported_commands"]
 
         # Execute via plugin interface
         result = plugin.execute_cases(
             cases_path=str(sample_cases_csv),
             metrics_path=str(metrics_file),
             max_workers=1,
-            verbose=True
+            verbose=True,
         )
 
         # Verify result structure
-        assert result['status'] == 'success'
-        assert result['exit_code'] == 2  # Threshold violations
-        assert 'stats' in result
+        assert result["status"] == "success"
+        assert result["exit_code"] == 2  # Threshold violations
+        assert "stats" in result
 
         # Verify stats
-        stats = result['stats']
-        assert stats['total_cases'] == 3
+        stats = result["stats"]
+        assert stats["total_cases"] == 3
         # Note: cases may be cached, so we check total cases and threshold violations
-        assert stats['total_cases'] == 3
-        assert stats['threshold_violations'] > 0  # But have threshold violations
+        assert stats["total_cases"] == 3
+        assert stats["threshold_violations"] > 0  # But have threshold violations
 
         # Verify metrics file was created
         assert metrics_file.exists()
@@ -292,9 +340,9 @@ class TestPluginIntegration:
 
         result = plugin.validate_cases(cases_path=str(sample_cases_csv))
 
-        assert result['status'] == 'success'
-        assert result['valid'] is True
-        assert 'validation_details' in result
+        assert result["status"] == "success"
+        assert result["valid"] is True
+        assert "validation_details" in result
 
     def test_plugin_cache_status(self, sample_cases_csv, temp_dir):
         """Test plugin cache status command."""
@@ -302,21 +350,21 @@ class TestPluginIntegration:
 
         # Initially no cache
         result = plugin.get_cache_status(cases_path=str(sample_cases_csv))
-        assert result['status'] == 'success'
-        assert result['cache_hits'] == 0
+        assert result["status"] == "success"
+        assert result["cache_hits"] == 0
 
         # Execute cases to populate cache
         metrics_file = temp_dir / "cache_test_metrics.csv"
         plugin.execute_cases(
             cases_path=str(sample_cases_csv),
             metrics_path=str(metrics_file),
-            max_workers=1
+            max_workers=1,
         )
 
         # Check cache status again
         result = plugin.get_cache_status(cases_path=str(sample_cases_csv))
-        assert result['status'] == 'success'
-        assert result['cache_hits'] > 0  # Should have cache hits now
+        assert result["status"] == "success"
+        assert result["cache_hits"] > 0  # Should have cache hits now
 
     def test_plugin_clear_cache(self, sample_cases_csv, temp_dir):
         """Test plugin cache clearing."""
@@ -325,21 +373,20 @@ class TestPluginIntegration:
         # Execute cases to populate cache
         metrics_file = temp_dir / "clear_cache_metrics.csv"
         plugin.execute_cases(
-            cases_path=str(sample_cases_csv),
-            metrics_path=str(metrics_file)
+            cases_path=str(sample_cases_csv), metrics_path=str(metrics_file)
         )
 
         # Verify cache exists
         cache_status = plugin.get_cache_status(cases_path=str(sample_cases_csv))
-        assert cache_status['cache_hits'] > 0
+        assert cache_status["cache_hits"] > 0
 
         # Clear cache
         result = plugin.clear_cache(cases_path=str(sample_cases_csv))
-        assert result['status'] == 'success'
+        assert result["status"] == "success"
 
         # Verify cache is cleared
         cache_status = plugin.get_cache_status(cases_path=str(sample_cases_csv))
-        assert cache_status['cache_hits'] == 0
+        assert cache_status["cache_hits"] == 0
 
     def test_plugin_error_handling(self, temp_dir):
         """Test plugin error handling with invalid inputs."""
@@ -347,13 +394,12 @@ class TestPluginIntegration:
 
         # Test with missing cases file
         result = plugin.execute_cases(
-            cases_path="nonexistent.csv",
-            metrics_path="output.csv"
+            cases_path="nonexistent.csv", metrics_path="output.csv"
         )
 
-        assert result['status'] == 'error'
-        assert 'message' in result
-        assert 'not found' in result['message'].lower()
+        assert result["status"] == "error"
+        assert "message" in result
+        assert "not found" in result["message"].lower()
 
     def test_plugin_get_adapters(self):
         """Test plugin adapter listing."""
@@ -361,17 +407,17 @@ class TestPluginIntegration:
 
         result = plugin.get_adapters()
 
-        assert result['status'] == 'success'
-        assert 'adapters' in result
+        assert result["status"] == "success"
+        assert "adapters" in result
 
-        adapters = result['adapters']
-        assert 'dummy' in adapters
-        assert 'shell' in adapters
+        adapters = result["adapters"]
+        assert "dummy" in adapters
+        assert "shell" in adapters
 
         # Verify adapter info structure
         for _adapter_name, adapter_info in adapters.items():
-            assert 'description' in adapter_info
-            assert 'supported_features' in adapter_info
+            assert "description" in adapter_info
+            assert "supported_features" in adapter_info
 
 
 class TestCLIIntegration:
@@ -386,7 +432,8 @@ class TestCLIIntegration:
 
         # Test that CLI module can be imported
         import strataregula_doe_runner.cli
-        assert hasattr(strataregula_doe_runner.cli, 'cli')
+
+        assert hasattr(strataregula_doe_runner.cli, "cli")
 
     def test_cli_help_and_version(self):
         """Test CLI help and version commands."""
@@ -396,7 +443,7 @@ class TestCLIIntegration:
         assert callable(cli)
 
         # Test that CLI has commands
-        assert hasattr(cli, 'commands')
+        assert hasattr(cli, "commands")
 
 
 class TestCSVFormat:
@@ -407,27 +454,34 @@ class TestCSVFormat:
         metrics_file = temp_dir / "format_test.csv"
 
         runner = Runner()
-        runner.execute(
-            cases_path=str(sample_cases_csv),
-            metrics_path=str(metrics_file)
-        )
+        runner.execute(cases_path=str(sample_cases_csv), metrics_path=str(metrics_file))
 
         # Read and verify CSV format
-        with open(metrics_file, 'rb') as f:
+        with open(metrics_file, "rb") as f:
             content = f.read()
 
         # Verify LF line endings
-        assert b'\r\n' not in content, "Should use LF line endings, not CRLF"
+        assert b"\r\n" not in content, "Should use LF line endings, not CRLF"
 
         # Verify CSV structure
         with open(metrics_file) as f:
             reader = csv.reader(f)
             header = next(reader)
 
-        required_columns = {'case_id', 'status', 'run_seconds', 'p95', 'p99',
-                            'throughput_rps', 'errors', 'ts_start', 'ts_end', 'run_id'}
+        required_columns = {
+            "case_id",
+            "status",
+            "run_seconds",
+            "p95",
+            "p99",
+            "throughput_rps",
+            "errors",
+            "ts_start",
+            "ts_end",
+            "run_id",
+        }
         assert required_columns.issubset(set(header))
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

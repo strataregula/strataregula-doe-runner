@@ -1,6 +1,7 @@
 """
 Strataregula plugin integration for DOE Runner
 """
+
 import logging
 from typing import Any, Dict
 
@@ -8,6 +9,7 @@ from .core.cache import CaseCache
 from .core.runner import Runner
 
 logger = logging.getLogger(__name__)
+
 
 class DOERunnerPlugin:
     """Strataregula plugin for DOE Runner batch experiment orchestrator."""
@@ -36,28 +38,29 @@ class DOERunnerPlugin:
                 "validate_cases",
                 "get_cache_status",
                 "clear_cache",
-                "get_adapters"
+                "get_adapters",
             ],
             "supported_backends": ["shell", "dummy", "simroute"],
             "exit_codes": {
                 "0": "All cases executed successfully",
                 "2": "Threshold violations detected",
-                "3": "Execution or configuration error"
-            }
+                "3": "Execution or configuration error",
+            },
         }
 
-    def execute_cases(self, cases_path: str, metrics_path: str = "metrics.csv",
-                     **options) -> Dict[str, Any]:
+    def execute_cases(
+        self, cases_path: str, metrics_path: str = "metrics.csv", **options
+    ) -> Dict[str, Any]:
         """Execute cases from CSV file."""
         try:
             config = {
-                'max_workers': options.get('max_workers', 1),
-                'fail_fast': options.get('fail_fast', False),
-                'force_rerun': options.get('force', False),
-                'dry_run': options.get('dry_run', False),
-                'verbose': options.get('verbose', False),
-                'run_log_dir': options.get('run_log_dir', 'docs/run'),
-                'compat_mode': options.get('compat_mode', False)
+                "max_workers": options.get("max_workers", 1),
+                "fail_fast": options.get("fail_fast", False),
+                "force_rerun": options.get("force", False),
+                "dry_run": options.get("dry_run", False),
+                "verbose": options.get("verbose", False),
+                "run_log_dir": options.get("run_log_dir", "docs/run"),
+                "compat_mode": options.get("compat_mode", False),
             }
 
             self.runner = Runner(**config)
@@ -66,11 +69,11 @@ class DOERunnerPlugin:
             # 統計情報をテストで期待される形式に変換
             stats = self.runner.stats if self.runner else {}
             test_stats = {
-                'total_cases': stats.get('total', 0),
-                'successful': stats.get('success', 0),
-                'failed': stats.get('failed', 0),
-                'timeout': stats.get('timeout', 0),
-                'threshold_violations': stats.get('threshold_violations', 0)
+                "total_cases": stats.get("total", 0),
+                "successful": stats.get("success", 0),
+                "failed": stats.get("failed", 0),
+                "timeout": stats.get("timeout", 0),
+                "threshold_violations": stats.get("threshold_violations", 0),
             }
 
             return {
@@ -79,23 +82,19 @@ class DOERunnerPlugin:
                 "exit_meaning": self._get_exit_meaning(exit_code),
                 "cases_path": cases_path,
                 "metrics_path": metrics_path,
-                "stats": test_stats
+                "stats": test_stats,
             }
 
         except Exception as e:
             logger.error(f"Execution failed: {e}")
-            return {
-                "status": "error",
-                "exit_code": 3,
-                "message": str(e)
-            }
+            return {"status": "error", "exit_code": 3, "message": str(e)}
 
     def _get_exit_meaning(self, exit_code: int) -> str:
         """Get human-readable exit code meaning."""
         meanings = {
             0: "All cases executed successfully, thresholds met",
             2: "Execution completed but threshold violations detected",
-            3: "I/O error, invalid configuration, or execution failure"
+            3: "I/O error, invalid configuration, or execution failure",
         }
         return meanings.get(exit_code, f"Unknown exit code: {exit_code}")
 
@@ -114,53 +113,41 @@ class DOERunnerPlugin:
             return {
                 "status": "success",
                 "valid": len(errors) == 0,
-                "validation_details": {
-                    "total_cases": len(cases),
-                    "errors": errors
-                }
+                "validation_details": {"total_cases": len(cases), "errors": errors},
             }
         except Exception as e:
-            return {
-                "status": "error",
-                "valid": False,
-                "message": str(e)
-            }
+            return {"status": "error", "valid": False, "message": str(e)}
 
     def get_cache_status(self, cases_path: str) -> Dict[str, Any]:
         """Get cache status for cases."""
         try:
             # 簡易的なキャッシュヒット数計算
             cache_hits = 0
-            if self.runner and hasattr(self.runner, 'cache'):
+            if self.runner and hasattr(self.runner, "cache"):
                 # 実際のキャッシュ実装に応じて調整
-                cache_hits = len(self.runner.cache.list_cached_cases()) if hasattr(self.runner.cache, 'list_cached_cases') else 0
+                cache_hits = (
+                    len(self.runner.cache.list_cached_cases())
+                    if hasattr(self.runner.cache, "list_cached_cases")
+                    else 0
+                )
 
             return {
                 "status": "success",
                 "cache_hits": cache_hits,
-                "cases_path": cases_path
+                "cases_path": cases_path,
             }
         except Exception as e:
-            return {
-                "status": "error",
-                "message": str(e)
-            }
+            return {"status": "error", "message": str(e)}
 
     def clear_cache(self, cases_path: str) -> Dict[str, Any]:
         """Clear cache for cases."""
         try:
-            if self.runner and hasattr(self.runner, 'cache'):
+            if self.runner and hasattr(self.runner, "cache"):
                 self.runner.cache.clear_all()
 
-            return {
-                "status": "success",
-                "message": "Cache cleared successfully"
-            }
+            return {"status": "success", "message": "Cache cleared successfully"}
         except Exception as e:
-            return {
-                "status": "error",
-                "message": str(e)
-            }
+            return {"status": "error", "message": str(e)}
 
     def get_adapters(self) -> Dict[str, Any]:
         """Get available adapters information."""
@@ -168,15 +155,10 @@ class DOERunnerPlugin:
             from .adapters import get_available_adapters
 
             adapters = get_available_adapters()
-            return {
-                "status": "success",
-                "adapters": adapters
-            }
+            return {"status": "success", "adapters": adapters}
         except Exception as e:
-            return {
-                "status": "error",
-                "message": str(e)
-            }
+            return {"status": "error", "message": str(e)}
+
 
 # Plugin factory function for strataregula
 def create_plugin():

@@ -1,6 +1,7 @@
 """
 CSV handler stub for initial testing
 """
+
 import csv
 from pathlib import Path
 from typing import Any, Dict, List
@@ -13,7 +14,7 @@ class CSVHandler:
         """Load cases from CSV"""
         cases = []
 
-        with open(file_path, encoding='utf-8', newline='') as f:
+        with open(file_path, encoding="utf-8", newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 cases.append(row)
@@ -36,8 +37,8 @@ class CSVHandler:
         # Simple column ordering
         columns = sorted(all_columns)
 
-        with open(file_path, 'w', encoding='utf-8', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=columns, lineterminator='\n')
+        with open(file_path, "w", encoding="utf-8", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=columns, lineterminator="\n")
             writer.writeheader()
             for row in metrics_data:
                 writer.writerow(row)

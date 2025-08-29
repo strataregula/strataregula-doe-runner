@@ -1,6 +1,7 @@
 """
 アダプターベースクラス
 """
+
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
@@ -38,7 +39,7 @@ class BaseAdapter(ABC):
 
     def name(self) -> str:
         """アダプター名を返す"""
-        return self.__class__.__name__.lower().replace('adapter', '')
+        return self.__class__.__name__.lower().replace("adapter", "")
 
     def supports_placeholders(self) -> bool:
         """プレースホルダー置換をサポートするか"""
@@ -46,5 +47,5 @@ class BaseAdapter(ABC):
 
     def validate_case(self, case: Dict[str, Any]) -> bool:
         """ケースがこのアダプターで実行可能かチェック"""
-        required_keys = ['case_id', 'backend', 'cmd_template']
+        required_keys = ["case_id", "backend", "cmd_template"]
         return all(key in case for key in required_keys)
