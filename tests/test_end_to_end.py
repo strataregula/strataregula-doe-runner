@@ -96,8 +96,9 @@ class TestEndToEndWorkflow:
         assert len(rows) == 3  # All 3 cases should be executed
         
         # Verify required columns
-        expected_columns = ['case_id', 'status', 'run_seconds', 'p95', 'p99', 
-                          'throughput_rps', 'errors', 'ts_start', 'ts_end']
+        expected_columns = ['case_id', 'status', 'run_seconds', 'p95', 'p99',
+                          'throughput_rps', 'errors', 'ts_start', 'ts_end',
+                          'stdout_path', 'stderr_path']
         for col in expected_columns:
             assert col in rows[0].keys()
         
@@ -111,6 +112,12 @@ class TestEndToEndWorkflow:
         assert results_by_id['test-02']['status'] == 'OK'
         assert float(results_by_id['test-02']['p95']) == 0.08
         assert float(results_by_id['test-02']['throughput_rps']) == 500
+        stdout_path = results_by_id['test-02']['stdout_path']
+        stderr_path = results_by_id['test-02']['stderr_path']
+        assert stdout_path and Path(stdout_path).exists()
+        assert Path(stdout_path).read_text().strip() == 'p95=0.08 p99=0.12 throughput_rps=500'
+        assert stderr_path and Path(stderr_path).exists()
+        assert Path(stderr_path).read_text() == ''
         
         # test-03 (threshold violation) should succeed but violate threshold
         assert results_by_id['test-03']['status'] == 'OK'

@@ -60,7 +60,24 @@ class CaseExecutor:
         try:
             # タイムアウト付き実行
             metrics = self._execute_with_timeout(adapter, case, timeout_s)
-            
+
+            stdout = metrics.pop('stdout', None)
+            stderr = metrics.pop('stderr', None)
+            stdout_path = ""
+            stderr_path = ""
+            if stdout is not None or stderr is not None:
+                ts_dir = datetime.now().strftime("%Y%m%d-%H%M%S")
+                artifact_dir = Path("artifacts") / case_id / ts_dir
+                artifact_dir.mkdir(parents=True, exist_ok=True)
+                if stdout is not None:
+                    stdout_file = artifact_dir / "stdout.log"
+                    stdout_file.write_text(stdout or "", encoding="utf-8")
+                    stdout_path = str(stdout_file)
+                if stderr is not None:
+                    stderr_file = artifact_dir / "stderr.log"
+                    stderr_file.write_text(stderr or "", encoding="utf-8")
+                    stderr_path = str(stderr_file)
+
             # 実行時間計測
             run_seconds = time.time() - start_time
             ts_end = datetime.now().isoformat()
@@ -77,6 +94,8 @@ class CaseExecutor:
                 errors=metrics.get('errors', 0),
                 ts_start=ts_start,
                 ts_end=ts_end,
+                stdout_path=stdout_path,
+                stderr_path=stderr_path,
                 cpu_util=metrics.get('cpu_util'),
                 mem_peak_mb=metrics.get('mem_peak_mb'),
                 queue_depth_p95=metrics.get('queue_depth_p95'),
