@@ -35,12 +35,15 @@ dependencies = [
     "python-dateutil>=2.8.0",
 ]
 
+# ここにbanbit
+
 [project.optional-dependencies]
 dev = [
     "pytest>=6.0.0",
     "pytest-cov>=2.10.0",
     "ruff>=0.1.0",
     "mypy>=0.910",
+    "bandit>=2.19.2",
 ]
 
 docs = [
