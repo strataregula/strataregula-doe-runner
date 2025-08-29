@@ -38,19 +38,18 @@ class DummyAdapter(BaseAdapter):
         # 追加メトリクス（ランダムに含める）
         if random.random() > 0.3:
             metrics['cpu_util'] = round(random.uniform(10, 80), 1)
-        
+
         if random.random() > 0.3:
             metrics['mem_peak_mb'] = round(random.uniform(50, 500), 1)
-        
+
         if random.random() > 0.5:
             metrics['queue_depth_p95'] = round(random.uniform(1, 10), 2)
-        
-        # 失敗をシミュレート（低確率）
-        if case.get('force_failure') or random.random() < 0.05:
+
+        # 失敗やタイムアウトは明示指定時のみ発生
+        if case.get('force_failure'):
             metrics['errors'] = 1
             raise RuntimeError("Simulated execution failure")
-        
-        # タイムアウトをシミュレート（極低確率）
+
         if case.get('force_timeout'):
             raise TimeoutError("Simulated timeout")
         
