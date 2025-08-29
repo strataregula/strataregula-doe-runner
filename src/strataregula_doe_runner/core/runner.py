@@ -30,6 +30,8 @@ class ExecutionResult:
     errors: int
     ts_start: str
     ts_end: str
+    stdout_path: str = ""
+    stderr_path: str = ""
     # 追加メタデータ
     cpu_util: Optional[float] = None
     mem_peak_mb: Optional[float] = None
