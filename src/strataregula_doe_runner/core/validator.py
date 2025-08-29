@@ -2,7 +2,7 @@
 cases.csv検証
 """
 
-from typing import Any, Dict, List
+from typing import Any
 
 
 class CaseValidator:
@@ -33,7 +33,7 @@ class CaseValidator:
         "threshold_throughput_rps": (int, float, str),
     }
 
-    def validate_cases(self, cases: List[Dict[str, Any]]) -> List[str]:
+    def validate_cases(self, cases: list[dict[str, Any]]) -> list[str]:
         """
         ケースリストを検証
 
@@ -73,7 +73,7 @@ class CaseValidator:
 
         return errors
 
-    def _validate_single_case(self, case: Dict[str, Any], row_num: int) -> List[str]:
+    def _validate_single_case(self, case: dict[str, Any], row_num: int) -> list[str]:
         """単一ケースの検証"""
         errors = []
         row_prefix = f"Row {row_num}"
@@ -135,7 +135,7 @@ class CaseValidator:
 
         return bool(re.match(r"^[a-zA-Z0-9_-]+$", case_id))
 
-    def validate_file_format(self, file_path: str) -> List[str]:
+    def validate_file_format(self, file_path: str) -> list[str]:
         """CSVファイル形式の検証"""
         errors = []
 

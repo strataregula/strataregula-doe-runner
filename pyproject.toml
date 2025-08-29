@@ -141,5 +141,6 @@ strict_equality = true
 module = [
     "yaml.*",
     "dateutil.*",
+    "strataregula_doe_runner.adapters.simroute",
 ]
 ignore_missing_imports = true

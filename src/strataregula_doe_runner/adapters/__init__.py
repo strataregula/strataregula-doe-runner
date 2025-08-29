@@ -3,6 +3,7 @@
 """
 
 from typing import Any
+
 from .base import BaseAdapter
 from .dummy import DummyAdapter
 from .shell import ShellAdapter
@@ -18,7 +19,7 @@ except ImportError:
 
 __all__ = [
     "BaseAdapter",
-    "ShellAdapter", 
+    "ShellAdapter",
     "DummyAdapter",
     "get_available_adapters",
 ]
@@ -37,7 +38,7 @@ def get_available_adapters() -> dict[str, Any]:
             "supported_features": ["command_execution", "metrics_parsing", "timeout_handling"],
         },
         "dummy": {
-            "name": "DummyAdapter", 
+            "name": "DummyAdapter",
             "description": "テスト用ダミーアダプター",
             "available": True,
             "supported_features": ["simulation", "deterministic_results", "testing"],
@@ -49,5 +50,5 @@ def get_available_adapters() -> dict[str, Any]:
             "supported_features": ["simulation", "routing_analysis"] if _SIMROUTE_AVAILABLE else [],
         },
     }
-    
+
     return adapters

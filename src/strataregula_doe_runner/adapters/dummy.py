@@ -4,7 +4,7 @@
 
 import random
 import time
-from typing import Any, Dict
+from typing import Any
 
 from .base import BaseAdapter
 
@@ -12,7 +12,7 @@ from .base import BaseAdapter
 class DummyAdapter(BaseAdapter):
     """テスト用のダミーアダプター"""
 
-    def execute(self, case: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, case: dict[str, Any]) -> dict[str, Any]:
         """
         ダミーの実行結果を生成
 
@@ -59,6 +59,6 @@ class DummyAdapter(BaseAdapter):
 
         return metrics
 
-    def validate_case(self, case: Dict[str, Any]) -> bool:
+    def validate_case(self, case: dict[str, Any]) -> bool:
         """ダミーアダプター用の検証（常にTrue）"""
         return super().validate_case(case)

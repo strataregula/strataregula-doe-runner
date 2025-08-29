@@ -26,8 +26,8 @@ try:
 
     _PLUGIN_AVAILABLE = True
 except ImportError:
-    _DOERunnerPlugin = None
     _PLUGIN_AVAILABLE = False
+    DOERunnerPlugin = None  # type: ignore
 
 __all__ = [
     "Runner",

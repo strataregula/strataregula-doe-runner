@@ -5,7 +5,7 @@
 import re
 import subprocess
 import time
-from typing import Any, Dict
+from typing import Any
 
 from .base import BaseAdapter
 
@@ -13,7 +13,7 @@ from .base import BaseAdapter
 class TemplateEngine:
     """簡単なテンプレート展開エンジン"""
 
-    def expand(self, template: str, context: Dict[str, Any]) -> str:
+    def expand(self, template: str, context: dict[str, Any]) -> str:
         """
         テンプレート文字列中の {key} を context[key] で置換
         """
@@ -32,7 +32,7 @@ class ShellAdapter(BaseAdapter):
     def __init__(self) -> None:
         self.template_engine = TemplateEngine()
 
-    def execute(self, case: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, case: dict[str, Any]) -> dict[str, Any]:
         """
         シェルコマンドを実行してメトリクスを解析
 
@@ -81,7 +81,7 @@ class ShellAdapter(BaseAdapter):
         except Exception as e:
             raise RuntimeError(f"Command execution failed: {e}") from e
 
-    def _parse_metrics(self, output: str) -> Dict[str, Any]:
+    def _parse_metrics(self, output: str) -> dict[str, Any]:
         """
         コマンド出力からメトリクスを抽出
 
@@ -143,7 +143,7 @@ class ShellAdapter(BaseAdapter):
 
         return metrics
 
-    def validate_case(self, case: Dict[str, Any]) -> bool:
+    def validate_case(self, case: dict[str, Any]) -> bool:
         """シェルアダプター用の検証"""
         if not super().validate_case(case):
             return False

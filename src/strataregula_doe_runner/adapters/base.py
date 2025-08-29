@@ -3,14 +3,14 @@
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any
 
 
 class BaseAdapter(ABC):
     """実行アダプターのベースクラス"""
 
     @abstractmethod
-    def execute(self, case: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, case: dict[str, Any]) -> dict[str, Any]:
         """
         ケースを実行してメトリクスを返す
 
@@ -45,7 +45,7 @@ class BaseAdapter(ABC):
         """プレースホルダー置換をサポートするか"""
         return True
 
-    def validate_case(self, case: Dict[str, Any]) -> bool:
+    def validate_case(self, case: dict[str, Any]) -> bool:
         """ケースがこのアダプターで実行可能かチェック"""
         required_keys = ["case_id", "backend", "cmd_template"]
         return all(key in case for key in required_keys)

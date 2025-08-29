@@ -3,7 +3,7 @@ Strataregula plugin integration for DOE Runner
 """
 
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from .core.cache import CaseCache
 from .core.runner import Runner
@@ -26,7 +26,7 @@ class DOERunnerPlugin:
         self.cache = CaseCache()
         logger.info(f"Initialized {self.name} v{self.version}")
 
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         """Get plugin information."""
         return {
             "name": self.name,
@@ -50,7 +50,7 @@ class DOERunnerPlugin:
 
     def execute_cases(
         self, cases_path: str, metrics_path: str = "metrics.csv", **options: Any
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Execute cases from CSV file."""
         try:
             config = {
@@ -102,7 +102,7 @@ class DOERunnerPlugin:
         }
         return meanings.get(exit_code, f"Unknown exit code: {exit_code}")
 
-    def validate_cases(self, cases_path: str) -> Dict[str, Any]:
+    def validate_cases(self, cases_path: str) -> dict[str, Any]:
         """Validate cases CSV file."""
         try:
             from .core.validator import CaseValidator
@@ -122,7 +122,7 @@ class DOERunnerPlugin:
         except Exception as e:
             return {"status": "error", "valid": False, "message": str(e)}
 
-    def get_cache_status(self, cases_path: str) -> Dict[str, Any]:
+    def get_cache_status(self, cases_path: str) -> dict[str, Any]:
         """Get cache status for cases."""
         try:
             # キャッシュヒット数を取得
@@ -139,7 +139,7 @@ class DOERunnerPlugin:
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
-    def clear_cache(self, cases_path: str) -> Dict[str, Any]:
+    def clear_cache(self, cases_path: str) -> dict[str, Any]:
         """Clear cache for cases."""
         try:
             if self.runner and hasattr(self.runner, "cache"):
@@ -149,7 +149,7 @@ class DOERunnerPlugin:
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
-    def get_adapters(self) -> Dict[str, Any]:
+    def get_adapters(self) -> dict[str, Any]:
         """Get available adapters information."""
         try:
             from .adapters import get_available_adapters

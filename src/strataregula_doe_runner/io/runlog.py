@@ -4,7 +4,6 @@ Run log writer stub
 
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List
 
 
 class RunlogWriter:
@@ -27,7 +26,7 @@ class RunlogWriter:
         self.content.append(f"**Total Cases:** {total_cases}")
         self.content.append("")
 
-    def write_summary(self, stats: Dict, results: List, duration: timedelta) -> None:
+    def write_summary(self, stats: dict, results: list, duration: timedelta) -> None:
         """Write execution summary"""
         self.content.append("## Summary")
         self.content.append("")
@@ -43,7 +42,7 @@ class RunlogWriter:
         with open(self.log_path, "w", encoding="utf-8") as f:
             f.write("\n".join(self.content))
 
-    def write_artifacts(self, artifact_paths: List[str]) -> None:
+    def write_artifacts(self, artifact_paths: list[str]) -> None:
         """Write artifact references"""
         if artifact_paths:
             self.content.append("## Artifacts")

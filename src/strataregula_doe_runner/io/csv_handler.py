@@ -4,13 +4,13 @@ CSV handler stub for initial testing
 
 import csv
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 
 class CSVHandler:
     """Simple CSV handler for testing"""
 
-    def load_cases(self, file_path: str) -> List[Dict[str, Any]]:
+    def load_cases(self, file_path: str) -> list[dict[str, Any]]:
         """Load cases from CSV"""
         cases = []
 
@@ -21,7 +21,7 @@ class CSVHandler:
 
         return cases
 
-    def write_metrics(self, metrics_data: List[Dict[str, Any]], file_path: str) -> None:
+    def write_metrics(self, metrics_data: list[dict[str, Any]], file_path: str) -> None:
         """Write metrics to CSV"""
         if not metrics_data:
             return

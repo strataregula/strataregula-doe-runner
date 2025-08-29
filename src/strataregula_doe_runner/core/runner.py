@@ -8,7 +8,6 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from ..io import CSVHandler, MetricsNormalizer, RunlogWriter
 from .cache import CaseCache
@@ -24,17 +23,17 @@ class ExecutionResult:
     case_id: str
     status: str  # OK|FAIL|TIMEOUT
     run_seconds: float
-    p95: Optional[float]
-    p99: Optional[float]
+    p95: float | None
+    p99: float | None
     throughput_rps: float
     errors: int
     ts_start: str
     ts_end: str
     # 追加メタデータ
-    cpu_util: Optional[float] = None
-    mem_peak_mb: Optional[float] = None
-    queue_depth_p95: Optional[float] = None
-    latency_p50: Optional[float] = None
+    cpu_util: float | None = None
+    mem_peak_mb: float | None = None
+    queue_depth_p95: float | None = None
+    latency_p50: float | None = None
 
 
 class Runner:
@@ -155,7 +154,7 @@ class Runner:
                 traceback.print_exc()
             return 3
 
-    def _load_and_validate_cases(self, path: str) -> List[Dict]:
+    def _load_and_validate_cases(self, path: str) -> list[dict]:
         """cases.csv読み込み・検証"""
         cases = self.csv_handler.load_cases(path)
 
@@ -173,7 +172,7 @@ class Runner:
 
         return normalized
 
-    def _compute_case_hash(self, case: Dict) -> str:
+    def _compute_case_hash(self, case: dict) -> str:
         """ケースの正規化ハッシュ計算"""
         # 決定論的要素のみ
         key_parts = [
@@ -186,7 +185,7 @@ class Runner:
         key = "|".join(str(p) for p in key_parts)
         return hashlib.sha256(key.encode()).hexdigest()[:16]
 
-    def _execute_cases(self, cases: List[Dict]) -> List[ExecutionResult]:
+    def _execute_cases(self, cases: list[dict]) -> list[ExecutionResult]:
         """並列/直列実行管理"""
         results = []
 
@@ -265,12 +264,12 @@ class Runner:
 
         return results
 
-    def _execute_single_case(self, case: Dict) -> ExecutionResult:
+    def _execute_single_case(self, case: dict) -> ExecutionResult:
         """単一ケース実行"""
         return self.executor.execute(case)
 
     def _check_thresholds(
-        self, cases: List[Dict], results: List[ExecutionResult]
+        self, cases: list[dict], results: list[ExecutionResult]
     ) -> int:
         """threshold検証"""
         violations = 0
@@ -307,7 +306,7 @@ class Runner:
         return violations
 
     def _write_metrics(
-        self, results: List[ExecutionResult], path: str, cases: List[Dict]
+        self, results: list[ExecutionResult], path: str, cases: list[dict]
     ) -> None:
         """決定論的なmetrics.csv出力"""
         # 結果を辞書化
@@ -329,9 +328,9 @@ class Runner:
         normalized = self.normalizer.normalize(metrics_data)
         self.csv_handler.write_metrics(normalized, path)
 
-    def _group_by_resource(self, cases: List[Dict]) -> Dict[str, List[Dict]]:
+    def _group_by_resource(self, cases: list[dict]) -> dict[str, list[dict]]:
         """resource_groupによるグループ化"""
-        groups: dict[str, list[Dict]] = {}
+        groups: dict[str, list[dict]] = {}
         for case in cases:
             group = case.get("resource_group", "default")
             if group not in groups:

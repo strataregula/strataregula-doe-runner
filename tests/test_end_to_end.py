@@ -3,6 +3,7 @@
 import csv
 import tempfile
 from pathlib import Path
+from typing import Generator
 
 import pytest
 
@@ -11,14 +12,14 @@ from strataregula_doe_runner.plugin import DOERunnerPlugin
 
 
 @pytest.fixture
-def temp_dir():
+def temp_dir() -> Generator[Path, None, None]:
     """Create a temporary directory for tests."""
     with tempfile.TemporaryDirectory() as tmpdir:
         yield Path(tmpdir)
 
 
 @pytest.fixture
-def sample_cases_csv(temp_dir):
+def sample_cases_csv(temp_dir: Path) -> Path:
     """Create a sample cases.csv file."""
     cases_file = temp_dir / "cases.csv"
 
@@ -81,7 +82,7 @@ def sample_cases_csv(temp_dir):
 
 
 @pytest.fixture
-def performance_cases_csv(temp_dir):
+def performance_cases_csv(temp_dir: Path) -> Path:
     """Create performance test cases with larger dataset."""
     cases_file = temp_dir / "perf_cases.csv"
 
@@ -119,7 +120,7 @@ def performance_cases_csv(temp_dir):
 class TestEndToEndWorkflow:
     """Test complete DOE Runner workflow."""
 
-    def test_complete_workflow_success(self, sample_cases_csv, temp_dir):
+    def test_complete_workflow_success(self, sample_cases_csv: Path, temp_dir: Path) -> None:
         """Test complete workflow: cases.csv → execution → metrics.csv → validation."""
         metrics_file = temp_dir / "metrics.csv"
 
@@ -174,7 +175,7 @@ class TestEndToEndWorkflow:
         assert results_by_id["test-03"]["status"] == "OK"
         assert float(results_by_id["test-03"]["p95"]) == 0.15  # Above threshold of 0.12
 
-    def test_workflow_with_cache(self, sample_cases_csv, temp_dir):
+    def test_workflow_with_cache(self, sample_cases_csv: Path, temp_dir: Path) -> None:
         """Test workflow with caching - second run should use cache."""
         metrics_file = temp_dir / "metrics.csv"
 
@@ -207,12 +208,12 @@ class TestEndToEndWorkflow:
         # Results should be identical (deterministic)
         assert len(first_metrics) == len(second_metrics)
 
-        for _i, (first, second) in enumerate(zip(first_metrics, second_metrics)):
+        for _i, (first, second) in enumerate(zip(first_metrics, second_metrics, strict=False)):
             assert first["case_id"] == second["case_id"]
             assert first["status"] == second["status"]
             # Note: execution times may differ slightly due to cache hits
 
-    def test_force_execution_bypasses_cache(self, sample_cases_csv, temp_dir):
+    def test_force_execution_bypasses_cache(self, sample_cases_csv: Path, temp_dir: Path) -> None:
         """Test that --force flag bypasses cache."""
         metrics_file = temp_dir / "metrics.csv"
 
@@ -231,7 +232,7 @@ class TestEndToEndWorkflow:
         assert exit_code == 2  # Should still have threshold violations
         assert metrics_file_2.exists()
 
-    def test_dry_run_validation(self, sample_cases_csv, temp_dir):
+    def test_dry_run_validation(self, sample_cases_csv: Path, temp_dir: Path) -> None:
         """Test dry run mode - validation only, no execution."""
         metrics_file = temp_dir / "metrics_dry.csv"
 
@@ -245,7 +246,7 @@ class TestEndToEndWorkflow:
         # No metrics file should be created
         assert not metrics_file.exists()
 
-    def test_parallel_execution(self, performance_cases_csv, temp_dir):
+    def test_parallel_execution(self, performance_cases_csv: Path, temp_dir: Path) -> None:
         """Test parallel execution with multiple workers."""
         metrics_file = temp_dir / "metrics_parallel.csv"
 
@@ -262,7 +263,7 @@ class TestEndToEndWorkflow:
 
         assert len(rows) == 50
 
-    def test_invalid_cases_file(self, temp_dir):
+    def test_invalid_cases_file(self, temp_dir: Path) -> None:
         """Test handling of invalid cases file."""
         invalid_cases = temp_dir / "invalid.csv"
 
@@ -282,7 +283,7 @@ class TestEndToEndWorkflow:
         # No metrics file should be created
         assert not metrics_file.exists()
 
-    def test_missing_cases_file(self, temp_dir):
+    def test_missing_cases_file(self, temp_dir: Path) -> None:
         """Test handling of missing cases file."""
         missing_file = temp_dir / "nonexistent.csv"
         metrics_file = temp_dir / "metrics.csv"
@@ -299,7 +300,7 @@ class TestEndToEndWorkflow:
 class TestPluginIntegration:
     """Test plugin interface and integration."""
 
-    def test_plugin_discovery_and_execution(self, sample_cases_csv, temp_dir):
+    def test_plugin_discovery_and_execution(self, sample_cases_csv: Path, temp_dir: Path) -> None:
         """Test plugin discovery and execution through plugin interface."""
         metrics_file = temp_dir / "plugin_metrics.csv"
 
@@ -334,7 +335,7 @@ class TestPluginIntegration:
         # Verify metrics file was created
         assert metrics_file.exists()
 
-    def test_plugin_validation_command(self, sample_cases_csv):
+    def test_plugin_validation_command(self, sample_cases_csv: Path) -> None:
         """Test plugin validation command."""
         plugin = DOERunnerPlugin()
 
@@ -344,7 +345,7 @@ class TestPluginIntegration:
         assert result["valid"] is True
         assert "validation_details" in result
 
-    def test_plugin_cache_status(self, sample_cases_csv, temp_dir):
+    def test_plugin_cache_status(self, sample_cases_csv: Path, temp_dir: Path) -> None:
         """Test plugin cache status command."""
         plugin = DOERunnerPlugin()
 
@@ -366,7 +367,7 @@ class TestPluginIntegration:
         assert result["status"] == "success"
         assert result["cache_hits"] > 0  # Should have cache hits now
 
-    def test_plugin_clear_cache(self, sample_cases_csv, temp_dir):
+    def test_plugin_clear_cache(self, sample_cases_csv: Path, temp_dir: Path) -> None:
         """Test plugin cache clearing."""
         plugin = DOERunnerPlugin()
 
@@ -388,7 +389,7 @@ class TestPluginIntegration:
         cache_status = plugin.get_cache_status(cases_path=str(sample_cases_csv))
         assert cache_status["cache_hits"] == 0
 
-    def test_plugin_error_handling(self, temp_dir):
+    def test_plugin_error_handling(self, temp_dir: Path) -> None:
         """Test plugin error handling with invalid inputs."""
         plugin = DOERunnerPlugin()
 
@@ -401,7 +402,7 @@ class TestPluginIntegration:
         assert "message" in result
         assert "not found" in result["message"].lower()
 
-    def test_plugin_get_adapters(self):
+    def test_plugin_get_adapters(self) -> None:
         """Test plugin adapter listing."""
         plugin = DOERunnerPlugin()
 
@@ -423,7 +424,7 @@ class TestPluginIntegration:
 class TestCLIIntegration:
     """Test CLI command integration."""
 
-    def test_cli_basic_execution(self, sample_cases_csv):
+    def test_cli_basic_execution(self, sample_cases_csv: Path) -> None:
         """Test CLI command execution."""
         from strataregula_doe_runner.cli import main
 
@@ -435,7 +436,7 @@ class TestCLIIntegration:
 
         assert hasattr(strataregula_doe_runner.cli, "cli")
 
-    def test_cli_help_and_version(self):
+    def test_cli_help_and_version(self) -> None:
         """Test CLI help and version commands."""
         from strataregula_doe_runner.cli import cli
 
@@ -449,7 +450,7 @@ class TestCLIIntegration:
 class TestCSVFormat:
     """Test output CSV format."""
 
-    def test_csv_format_compliance(self, sample_cases_csv, temp_dir):
+    def test_csv_format_compliance(self, sample_cases_csv: Path, temp_dir: Path) -> None:
         """Test that output CSV follows format specifications."""
         metrics_file = temp_dir / "format_test.csv"
 
