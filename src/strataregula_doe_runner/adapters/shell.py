@@ -54,7 +54,7 @@ class ShellAdapter(BaseAdapter):
         try:
             result = subprocess.run(
                 cmd,
-                shell=True,
+                shell=True,  # nosec B602 - shell=True required for DOE Runner shell adapter
                 capture_output=True,
                 text=True,
                 timeout=int(case.get("timeout_s", 30)),
